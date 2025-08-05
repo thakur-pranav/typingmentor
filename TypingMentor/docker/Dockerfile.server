@@ -1,0 +1,16 @@
+FROM node:20-alpine AS base
+WORKDIR /app
+
+COPY server/package*.json ./server/
+COPY shared ./shared
+WORKDIR /app/server
+RUN npm install
+
+WORKDIR /app
+COPY server ./server
+
+WORKDIR /app/server
+RUN npm run build
+
+EXPOSE 5000
+CMD ["node", "dist/server.js"]

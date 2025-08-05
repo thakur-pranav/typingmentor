@@ -1,0 +1,1 @@
+export { PASSAGES } from "./passages";

@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: typingmentor-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  server:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.server
+    container_name: typingmentor-server
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    environment:
+      PORT: 5000
+      NODE_ENV: development
+      MONGODB_URI: mongodb://mongo:27017/typingmentor
+      JWT_SECRET: dev_secret_change_me
+      JWT_EXPIRES_IN: 7d
+      CLIENT_URL: http://localhost:3000
+    ports:
+      - "5000:5000"
+
+  client:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.client
+    container_name: typingmentor-client
+    restart: unless-stopped
+    depends_on:
+      - server
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:5000
+    ports:
+      - "3000:3000"
+
+volumes:
+  mongo-data:

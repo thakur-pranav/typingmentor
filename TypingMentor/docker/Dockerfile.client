@@ -1,0 +1,15 @@
+FROM node:20-alpine AS base
+WORKDIR /app
+
+COPY client/package*.json ./client/
+WORKDIR /app/client
+RUN npm install
+
+WORKDIR /app
+COPY client ./client
+
+WORKDIR /app/client
+RUN npm run build
+
+EXPOSE 3000
+CMD ["npm", "start"]
