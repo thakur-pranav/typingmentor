@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Typing Mentor logo">
+  <defs>
+    <linearGradient id="bg" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#0b1020"/>
+      <stop offset="100%" stop-color="#121a2b"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="50%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#bg)"/>
+
+  <g>
+    <rect x="11" y="16" width="42" height="32" rx="9" fill="#131e2f" stroke="#2d3c56" stroke-width="1.5"/>
+    <g fill="#eff6ff">
+      <rect x="16" y="21" width="6" height="5" rx="1.5"/>
+      <rect x="23" y="21" width="6" height="5" rx="1.5"/>
+      <rect x="30" y="21" width="6" height="5" rx="1.5"/>
+      <rect x="37" y="21" width="6" height="5" rx="1.5"/>
+      <rect x="19" y="28" width="7" height="5" rx="1.5"/>
+      <rect x="27" y="28" width="7" height="5" rx="1.5"/>
+      <rect x="35" y="28" width="7" height="5" rx="1.5"/>
+    </g>
+    <path d="M19 40h26" stroke="#9fb2d0" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+  </g>
+
+  <g fill="none" stroke="url(#accent)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 17v21"/>
+    <path d="M20 17h10"/>
+    <path d="M20 28h8"/>
+    <path d="M20 38h13"/>
+    <path d="M35 17v21"/>
+    <path d="M35 17h10"/>
+    <path d="M35 28h8"/>
+    <path d="M35 38h10"/>
+  </g>
+
+  <rect x="45" y="13" width="8" height="8" rx="2.2" fill="#22d3ee" opacity="0.95"/>
+  <path d="M48 16.5h2.2M49.1 15.4v2.2" stroke="#0b1020" stroke-width="1.3" stroke-linecap="round"/>
+</svg>

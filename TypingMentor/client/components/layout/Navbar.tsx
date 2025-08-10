@@ -11,8 +11,24 @@ export function Navbar() {
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
         <Link
           href="/"
-          className="text-xl font-black uppercase tracking-tight text-nb-text hover:underline"
+          className="flex items-center gap-2 text-xl font-black uppercase tracking-tight text-nb-text hover:underline"
         >
+          {/* Keyboard icon */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="2" y="6" width="20" height="13" rx="2" />
+            <path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8" />
+          </svg>
           TypingMentor
         </Link>
 
