@@ -19,5 +19,6 @@ export function errorMiddleware(err, _req, res, _next) {
   res.status(statusCode).json({
     success: false,
     message,
+    ...(err.code ? { code: err.code } : {}),
   });
 }

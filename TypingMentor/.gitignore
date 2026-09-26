@@ -8,3 +8,5 @@ dist/
 coverage/
 *.tsbuildinfo
 coverage/
+rules.md
+.agents/ 

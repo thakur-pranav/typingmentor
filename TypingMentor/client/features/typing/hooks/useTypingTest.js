@@ -50,8 +50,42 @@ export function useTypingTest(options) {
     setWpmHistory([]);
   }, []);
 
+  const remainingSeconds = options.timedDurationSeconds
+    ? Math.max(0, options.timedDurationSeconds - stats.elapsedSeconds)
+    : 0;
+
+  const progressPercent =
+    options.targetText && options.targetText.length > 0
+      ? Math.min(100, Math.round((typed.length / options.targetText.length) * 100))
+      : 0;
+
   return useMemo(
-    () => ({ typed, comparison, stats, isFinished, result, wpmHistory, handleInput, reset }),
-    [typed, comparison, stats, isFinished, result, wpmHistory, handleInput, reset]
+    () => ({
+      typed,
+      comparison,
+      stats,
+      isFinished,
+      result,
+      wpmHistory,
+      remainingSeconds,
+      elapsedSeconds: stats.elapsedSeconds,
+      currentWpm: stats.wpm,
+      currentAccuracy: stats.accuracy,
+      progressPercent,
+      handleInput,
+      reset,
+    }),
+    [
+      typed,
+      comparison,
+      stats,
+      isFinished,
+      result,
+      wpmHistory,
+      remainingSeconds,
+      progressPercent,
+      handleInput,
+      reset,
+    ]
   );
 }

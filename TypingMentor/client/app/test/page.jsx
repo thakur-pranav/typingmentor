@@ -9,8 +9,6 @@ import { TestModeSelector } from "../../features/typing/components/TestModeSelec
 import { DurationSelector } from "../../features/typing/components/DurationSelector.jsx";
 import { LanguageSelector } from "../../features/typing/components/LanguageSelector.jsx";
 import { TypingArea } from "../../features/typing/components/TypingArea.jsx";
-import { TypingStats } from "../../features/typing/components/TypingStats.jsx";
-import { TypingProgress } from "../../features/typing/components/TypingProgress.jsx";
 import { TestControls } from "../../features/typing/components/TestControls.jsx";
 import { TestResult } from "../../features/typing/components/TestResult.jsx";
 
@@ -30,23 +28,20 @@ export default function TestPage() {
     mode === "passage" ? passage.text :
     /* code */           codePassage.text;
 
+  const isTimed = mode === "timed" || mode === "code";
+
   const {
     comparison,
     typed,
     isFinished,
     result,
     wpmHistory,
-    remainingSeconds,
-    elapsedSeconds,
-    currentWpm,
-    currentAccuracy,
-    progressPercent,
     handleInput,
     reset,
   } = useTypingTest({
     mode,
     targetText,
-    timedDurationSeconds: mode === "timed" ? duration : undefined,
+    timedDurationSeconds: isTimed ? duration : undefined,
   });
 
   const handleModeChange = useCallback((nextMode) => {
@@ -99,13 +94,13 @@ export default function TestPage() {
   }, [isFinished, result, isAuthenticated, mode, saveStatus]);
 
   return (
-    <div key={attempt} className="mx-auto w-full max-w-6xl px-6 py-16">
+    <div key={attempt} className="mx-auto flex flex-1 w-full max-w-6xl flex-col justify-center px-6 py-8">
 
       {/* Toolbar */}
-      <div className="mb-8 flex flex-wrap items-center gap-2">
+      <div className="mb-6 flex flex-wrap items-center justify-start gap-2">
         <TestModeSelector mode={mode} onChange={handleModeChange} />
 
-        {mode === "timed" && (
+        {isTimed && (
           <>
             <span className="mx-1 font-bold text-nb-sub">·</span>
             <DurationSelector duration={duration} onChange={handleDurationChange} />
@@ -122,27 +117,22 @@ export default function TestPage() {
 
       {/* Code snippet label (shown only in code mode) */}
       {mode === "code" && !isFinished && (
-        <div className="mb-4 inline-flex items-center gap-2 border-2 border-nb-border bg-nb-cyan px-3 py-1 text-xs font-bold uppercase tracking-widest shadow-nb-sm">
-          <span>{codePassage.language}</span>
-          <span className="text-nb-text/50">·</span>
-          <span>{codePassage.label}</span>
+        <div className="mb-4 flex justify-start">
+          <div className="inline-flex items-center gap-2 border-2 border-nb-border bg-nb-cyan px-3 py-1 text-xs font-bold uppercase tracking-widest shadow-nb-sm">
+            <span>{codePassage.language}</span>
+            <span className="text-nb-text/50">·</span>
+            <span>{codePassage.label}</span>
+          </div>
         </div>
       )}
 
       {/* Active test */}
       {!isFinished && comparison && (
-        <div className="space-y-6">
-          <TypingStats
-            wpm={currentWpm}
-            accuracy={currentAccuracy}
-            remainingSeconds={remainingSeconds}
-            elapsedSeconds={elapsedSeconds}
-            mode={mode}
-          />
-          <TypingProgress percent={progressPercent} />
+        <div className="mx-auto w-full space-y-6">
           <TypingArea
             statuses={comparison.statuses}
             typed={typed}
+            targetText={targetText}
             onInput={handleInput}
             disabled={isFinished}
           />

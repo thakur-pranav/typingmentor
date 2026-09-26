@@ -13,7 +13,7 @@ export class TypingEngine {
     this.mode = options.mode;
     this.targetText = options.targetText;
     this.timedDurationSeconds = options.timedDurationSeconds;
-    this.timer = new Timer(this.mode === "timed" ? options.timedDurationSeconds ?? null : null);
+    this.timer = new Timer(options.timedDurationSeconds ? options.timedDurationSeconds : null);
 
     this.typed = "";
     this.started = false;
@@ -75,7 +75,17 @@ export class TypingEngine {
   handleInput(value) {
     if (this.finished) return;
 
-    const clamped = value.slice(0, this.targetText.length);
+    // Normalize input: if user typed a space where target expects a newline, accept it as newline
+    let normalized = "";
+    for (let i = 0; i < value.length && i < this.targetText.length; i++) {
+      if (this.targetText[i] === "\n" && value[i] === " ") {
+        normalized += "\n";
+      } else {
+        normalized += value[i];
+      }
+    }
+
+    const clamped = normalized;
 
     if (!this.started && clamped.length > 0) {
       this.started = true;
@@ -87,7 +97,10 @@ export class TypingEngine {
 
     if (clamped.length > this.typed.length) {
       for (let i = this.typed.length; i < clamped.length; i++) {
-        if (clamped[i] === this.targetText[i]) {
+        const isMatch =
+          clamped[i] === this.targetText[i] ||
+          (this.targetText[i] === "\n" && clamped[i] === " ");
+        if (isMatch) {
           this.rawCorrectKeystrokes++;
         } else {
           this.rawIncorrectKeystrokes++;
@@ -97,7 +110,7 @@ export class TypingEngine {
 
     this.typed = clamped;
 
-    if ((this.mode === "passage" || this.mode === "code") && this.typed.length === this.targetText.length) {
+    if (this.typed.length === this.targetText.length) {
       this.finish();
       return;
     }
@@ -112,8 +125,11 @@ export class TypingEngine {
 
     const comparison = analyzeCharacters(this.targetText, this.typed);
     const totalCharacters = comparison.correctCharacters + comparison.incorrectCharacters;
+    const elapsed = this.timer.getElapsedSeconds();
     const duration =
-      this.mode === "timed" ? this.timedDurationSeconds ?? 0 : this.timer.getElapsedSeconds();
+      this.timedDurationSeconds && elapsed >= this.timedDurationSeconds
+        ? this.timedDurationSeconds
+        : Math.max(1, Math.round(elapsed * 100) / 100);
 
     const rawTotal = this.rawCorrectKeystrokes + this.rawIncorrectKeystrokes;
 

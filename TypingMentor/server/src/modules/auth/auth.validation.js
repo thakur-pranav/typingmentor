@@ -10,3 +10,15 @@ export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
 });
+
+export const verifyEmailSchema = z.object({
+  token: z.string().min(1),
+});
+
+export const resendVerificationSchema = z.object({
+  email: z.string().email(),
+});
+
+export const googleAuthSchema = z.object({
+  credential: z.string().min(1),
+});

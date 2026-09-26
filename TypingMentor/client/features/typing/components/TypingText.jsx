@@ -14,7 +14,7 @@ function groupIntoWords(statuses) {
   let current = [];
   for (const s of statuses) {
     current.push(s);
-    if (s.char === " ") {
+    if (s.char === " " || s.char === "\n") {
       words.push(current);
       current = [];
     }
@@ -26,7 +26,7 @@ function groupIntoWords(statuses) {
 function charClass(state) {
   if (state === "correct")   return "text-[#0d0d0d]";         // typed correctly: black
   if (state === "incorrect") return "text-[#ff006e] underline decoration-[#ff006e]"; // wrong: pink-red
-  if (state === "current")   return "text-[#0d0d0d]";         // cursor position: black
+  if (state === "current")   return "text-[#aaa89c]";         // cursor position: keep untyped warm gray
   return "text-[#aaa89c]";                                     // untyped: warm gray
 }
 
@@ -89,7 +89,7 @@ export function TypingText({ statuses }) {
       {/* Scrolling paragraph */}
       <p
         ref={paragraphRef}
-        className="select-none font-mono text-[1.4rem] tracking-wide"
+        className="select-none font-mono text-[1.4rem] tracking-wide whitespace-pre-wrap"
         style={{
           lineHeight:  `${LINE_H}px`,
           transform:   `translateY(${translateY}px)`,
@@ -101,11 +101,23 @@ export function TypingText({ statuses }) {
           <span key={wi} className="inline">
             {word.map((status, ci) => {
               const idx = flatIndex++;
+              if (status.char === "\n") {
+                return (
+                  <span
+                    key={ci}
+                    ref={(el) => { charRefs.current[idx] = el; }}
+                    className={`inline ${charClass(status.state)}`}
+                  >
+                    ↵{"\n"}
+                  </span>
+                );
+              }
+              const isIncorrectSpace = status.char === " " && status.state === "incorrect";
               return (
                 <span
                   key={ci}
                   ref={(el) => { charRefs.current[idx] = el; }}
-                  className={charClass(status.state)}
+                  className={`${charClass(status.state)} ${isIncorrectSpace ? "bg-[#ff006e]/20 rounded-sm" : ""}`}
                 >
                   {status.char}
                 </span>

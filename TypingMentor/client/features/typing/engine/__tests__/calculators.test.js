@@ -67,6 +67,16 @@ describe("analyzeCharacters", () => {
     expect(result.statuses[2].state).toBe("current");
     expect(result.statuses[3].state).toBe("untyped");
   });
+
+  it("accepts space or newline for target newlines in code mode", () => {
+    const withSpace = analyzeCharacters("a\nb", "a b");
+    expect(withSpace.correctCharacters).toBe(3);
+    expect(withSpace.incorrectCharacters).toBe(0);
+
+    const withNewline = analyzeCharacters("a\nb", "a\nb");
+    expect(withNewline.correctCharacters).toBe(3);
+    expect(withNewline.incorrectCharacters).toBe(0);
+  });
 });
 
 describe("calculateResult", () => {

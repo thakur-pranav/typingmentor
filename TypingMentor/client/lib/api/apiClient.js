@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getToken, clearToken } from "../auth/tokenStorage";
+import { getToken, clearToken } from "../auth/tokenStorage.js";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
 

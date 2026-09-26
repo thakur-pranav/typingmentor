@@ -10,7 +10,9 @@ export function analyzeCharacters(target, typed) {
 
   for (let i = 0; i < target.length; i++) {
     if (i < typed.length) {
-      const isCorrect = typed[i] === target[i];
+      const isCorrect =
+        typed[i] === target[i] ||
+        (target[i] === "\n" && (typed[i] === " " || typed[i] === "\n"));
       if (isCorrect) correctCharacters++;
       else incorrectCharacters++;
       statuses.push({ char: target[i], state: isCorrect ? "correct" : "incorrect" });

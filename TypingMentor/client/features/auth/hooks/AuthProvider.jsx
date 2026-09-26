@@ -42,9 +42,30 @@ export function AuthProvider({ children }) {
   }, []);
 
   const register = useCallback(async (payload) => {
-    const { token, user: registeredUser } = await authService.register(payload);
+    const data = await authService.register(payload);
+    if (data.token) {
+      setToken(data.token);
+      setUser(data.user);
+    }
+    return data;
+  }, []);
+
+  const verifyEmail = useCallback(async (token) => {
+    const { token: authToken, user: verifiedUser } = await authService.verifyEmail({ token });
+    setToken(authToken);
+    setUser(verifiedUser);
+    return verifiedUser;
+  }, []);
+
+  const resendVerification = useCallback(async (email) => {
+    return await authService.resendVerification({ email });
+  }, []);
+
+  const googleLogin = useCallback(async (credential) => {
+    const { token, user: loggedInUser } = await authService.googleLogin({ credential });
     setToken(token);
-    setUser(registeredUser);
+    setUser(loggedInUser);
+    return loggedInUser;
   }, []);
 
   const logout = useCallback(async () => {
@@ -63,10 +84,13 @@ export function AuthProvider({ children }) {
       isLoading,
       login,
       register,
+      verifyEmail,
+      resendVerification,
+      googleLogin,
       logout,
       refreshUser,
     }),
-    [user, isLoading, login, register, logout, refreshUser]
+    [user, isLoading, login, register, verifyEmail, resendVerification, googleLogin, logout, refreshUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

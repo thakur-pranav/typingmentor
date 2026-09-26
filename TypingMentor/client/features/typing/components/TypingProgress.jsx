@@ -1,6 +1,10 @@
-export function TypingProgress({ typedLength, totalLength }) {
-  const percent =
-    totalLength === 0 ? 0 : Math.min(100, Math.round((typedLength / totalLength) * 100));
+export function TypingProgress({ percent, typedLength, totalLength }) {
+  const calculatedPercent =
+    percent !== undefined
+      ? percent
+      : totalLength === 0 || totalLength === undefined
+      ? 0
+      : Math.min(100, Math.round((typedLength / totalLength) * 100));
 
   return (
     <div className="h-2 w-full overflow-hidden border-2 border-nb-border bg-nb-card shadow-nb-sm">
