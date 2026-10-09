@@ -4,7 +4,7 @@ import { ApiError } from "../../utils/ApiError.js";
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const googleAuthService = {
-  async verifyGoogleToken({ credential, accessToken }) {
+  async verifyGoogleToken({ credential, accessToken } = {}) {
     if (accessToken) {
       return this.verifyAccessToken(accessToken);
     }

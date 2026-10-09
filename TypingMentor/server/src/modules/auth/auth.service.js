@@ -137,7 +137,7 @@ export const authService = {
   },
 
   async googleLogin(payload) {
-    const tokenPayload = typeof payload === "string" ? { credential: payload } : payload;
+    const tokenPayload = typeof payload === "string" ? { credential: payload } : (payload || {});
     const googleProfile = await googleAuthService.verifyGoogleToken(tokenPayload);
 
     let user = await authRepository.findByGoogleId(googleProfile.googleId);

@@ -1,7 +1,8 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import request from "supertest";
 import "./setup.js";
 import { createApp } from "../app.js";
+import { googleAuthService } from "../modules/auth/google.service.js";
 
 const app = createApp();
 
@@ -106,4 +107,43 @@ describe("Auth", () => {
     });
     expect(res.status).toBe(200);
   });
+
+  it("authenticates via Google using accessToken payload", async () => {
+    vi.spyOn(googleAuthService, "verifyGoogleToken").mockResolvedValueOnce({
+      googleId: "google-12345",
+      email: "googleuser@example.com",
+      name: "Google User",
+      picture: "https://example.com/avatar.png",
+      isEmailVerified: true,
+    });
+
+    const res = await request(app).post("/api/auth/google").send({
+      accessToken: "mock-valid-access-token",
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.token).toBeDefined();
+    expect(res.body.data.user.email).toBe("googleuser@example.com");
+    expect(res.body.data.user.isEmailVerified).toBe(true);
+  });
+
+  it("authenticates via Google using credential (idToken) payload", async () => {
+    vi.spyOn(googleAuthService, "verifyGoogleToken").mockResolvedValueOnce({
+      googleId: "google-67890",
+      email: "credentialuser@example.com",
+      name: "Credential User",
+      picture: "https://example.com/avatar2.png",
+      isEmailVerified: true,
+    });
+
+    const res = await request(app).post("/api/auth/google").send({
+      credential: "mock-valid-id-token",
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.token).toBeDefined();
+    expect(res.body.data.user.email).toBe("credentialuser@example.com");
+    expect(res.body.data.user.isEmailVerified).toBe(true);
+  });
 });
+

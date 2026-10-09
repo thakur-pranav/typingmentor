@@ -28,8 +28,7 @@ export const authController = {
   }),
 
   googleLogin: asyncHandler(async (req, res) => {
-    const { credential } = req.body;
-    const result = await authService.googleLogin(credential);
+    const result = await authService.googleLogin(req.body);
     sendSuccess(res, 200, "Google login successful", result);
   }),
 
