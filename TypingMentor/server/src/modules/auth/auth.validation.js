@@ -19,6 +19,11 @@ export const resendVerificationSchema = z.object({
   email: z.string().email(),
 });
 
-export const googleAuthSchema = z.object({
-  credential: z.string().min(1),
-});
+export const googleAuthSchema = z
+  .object({
+    credential: z.string().min(1).optional(),
+    accessToken: z.string().min(1).optional(),
+  })
+  .refine((data) => data.credential || data.accessToken, {
+    message: "Either credential or accessToken must be provided",
+  });

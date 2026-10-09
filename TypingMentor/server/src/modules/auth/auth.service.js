@@ -136,8 +136,9 @@ export const authService = {
     return { message: "Verification link sent! Please check your email inbox." };
   },
 
-  async googleLogin(credential) {
-    const googleProfile = await googleAuthService.verifyIdToken(credential);
+  async googleLogin(payload) {
+    const tokenPayload = typeof payload === "string" ? { credential: payload } : payload;
+    const googleProfile = await googleAuthService.verifyGoogleToken(tokenPayload);
 
     let user = await authRepository.findByGoogleId(googleProfile.googleId);
 

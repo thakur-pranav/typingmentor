@@ -7,6 +7,12 @@ dist/
 .DS_Store
 coverage/
 *.tsbuildinfo
-coverage/
-rules.md
-.agents/ 
+
+# Local AI Context & Rules
+.agents/
+PROJECT_STRUCTURE.md
+context.md
+.cursorrules
+CLAUDE.md
+.windsurfrules
+.github/

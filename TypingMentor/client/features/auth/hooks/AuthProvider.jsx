@@ -61,8 +61,9 @@ export function AuthProvider({ children }) {
     return await authService.resendVerification({ email });
   }, []);
 
-  const googleLogin = useCallback(async (credential) => {
-    const { token, user: loggedInUser } = await authService.googleLogin({ credential });
+  const googleLogin = useCallback(async (payload) => {
+    const data = typeof payload === "string" ? { credential: payload } : payload;
+    const { token, user: loggedInUser } = await authService.googleLogin(data);
     setToken(token);
     setUser(loggedInUser);
     return loggedInUser;

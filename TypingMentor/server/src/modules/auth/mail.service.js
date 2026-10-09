@@ -11,12 +11,19 @@ function getTransporter() {
   const pass = process.env.SMTP_PASS;
 
   if (host && user && pass) {
-    transporter = nodemailer.createTransport({
-      host,
-      port,
-      secure: port === 465,
-      auth: { user, pass },
-    });
+    if (host.includes("gmail") || process.env.SMTP_SERVICE === "gmail") {
+      transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: { user, pass },
+      });
+    } else {
+      transporter = nodemailer.createTransport({
+        host,
+        port,
+        secure: port === 465,
+        auth: { user, pass },
+      });
+    }
   }
 
   return transporter;
@@ -24,6 +31,10 @@ function getTransporter() {
 
 export const mailService = {
   async sendVerificationEmail({ to, username, token }) {
+    if (process.env.NODE_ENV === "test") {
+      return;
+    }
+
     const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
     const verificationUrl = `${clientUrl}/verify-email?token=${token}`;
 
