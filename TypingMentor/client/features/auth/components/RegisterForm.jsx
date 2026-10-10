@@ -49,11 +49,10 @@ export function RegisterForm() {
         <p className="text-sm text-nb-text">
           We&apos;ve sent a verification link to <strong>{registeredEmail}</strong>.
         </p>
-        <p className="text-xs text-nb-sub bg-nb-yellow/20 p-3 border-2 border-nb-border">
-          Please click the link in your email to activate your account.
-          <br />
-          <span className="text-[11px] font-bold text-nb-text/70 mt-1 block">
-            (In local development, check your server terminal for the verification link!)
+        <p className="text-xs text-nb-text bg-nb-yellow/20 p-3 border-2 border-nb-border font-medium leading-relaxed">
+          Please click the link in your email to activate your account and start competing on the leaderboard.
+          <span className="text-[11px] text-nb-sub mt-1.5 block">
+            Didn&apos;t receive it? Check your spam folder or request a new link on the verification page.
           </span>
         </p>
         <div className="pt-2">

@@ -5,11 +5,16 @@ export const resultRepository = {
     return ResultModel.create({ userId, ...data });
   },
 
-  async findHistory(userId, page, limit) {
+  async findHistory(userId, page, limit, filter = {}) {
     const skip = (page - 1) * limit;
+    const query = {
+      userId,
+      ...(filter.mode ? { mode: filter.mode } : {}),
+      ...(filter.duration ? { duration: Number(filter.duration) } : {}),
+    };
     const [results, total] = await Promise.all([
-      ResultModel.find({ userId }).sort({ createdAt: -1 }).skip(skip).limit(limit),
-      ResultModel.countDocuments({ userId }),
+      ResultModel.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      ResultModel.countDocuments(query),
     ]);
     return { results, total };
   },

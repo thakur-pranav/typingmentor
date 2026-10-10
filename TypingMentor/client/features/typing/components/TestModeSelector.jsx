@@ -6,6 +6,7 @@ const OPTIONS = [
   { value: "timed",   label: "time"    },
   { value: "passage", label: "passage" },
   { value: "code",    label: "code"    },
+  { value: "custom",  label: "custom"  },
 ];
 
 export function TestModeSelector({ mode, onChange }) {

@@ -4,9 +4,12 @@ import { leaderboardService } from "./leaderboard.service.js";
 
 export const leaderboardController = {
   get: asyncHandler(async (req, res) => {
-    const page = Number(req.query.page ?? 1) || 1;
-    const limit = Number(req.query.limit ?? 100) || 100;
-    const leaderboard = await leaderboardService.getLeaderboard(page, limit);
+    const { page, limit, mode, duration } = req.query;
+    const filter = {};
+    if (mode) filter.mode = mode;
+    if (duration) filter.duration = duration;
+
+    const leaderboard = await leaderboardService.getLeaderboard(page, limit, filter);
     sendSuccess(res, 200, "Leaderboard retrieved", leaderboard);
   }),
 };

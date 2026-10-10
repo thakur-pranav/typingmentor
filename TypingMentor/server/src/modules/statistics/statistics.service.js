@@ -1,6 +1,6 @@
 import { statisticsRepository } from "./statistics.repository.js";
 
-const RECENT_TESTS_LIMIT = 10;
+const RECENT_TESTS_LIMIT = 20;
 
 export const statisticsService = {
   async getForUser(userId) {

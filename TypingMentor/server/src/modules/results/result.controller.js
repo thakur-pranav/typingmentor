@@ -12,8 +12,11 @@ export const resultController = {
 
   history: asyncHandler(async (req, res) => {
     if (!req.auth) throw ApiError.unauthorized();
-    const { page, limit } = req.query;
-    const data = await resultService.getHistory(req.auth.userId, page, limit);
+    const { page, limit, mode, duration } = req.query;
+    const filter = {};
+    if (mode) filter.mode = mode;
+    if (duration) filter.duration = duration;
+    const data = await resultService.getHistory(req.auth.userId, page, limit, filter);
     sendSuccess(res, 200, "History retrieved", data);
   }),
 };

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { TypingText } from "./TypingText";
+import { soundEngine } from "../utils/soundEngine.js";
 
 export function TypingArea({ statuses, typed, onInput, disabled, targetText }) {
   const inputRef = useRef(null);
@@ -15,8 +16,11 @@ export function TypingArea({ statuses, typed, onInput, disabled, targetText }) {
   }
 
   function handleKeyDown(event) {
+    if (disabled) return;
+
     if (event.key === "Tab") {
       event.preventDefault();
+      soundEngine.playKey("tab");
       // If the upcoming characters in targetText are spaces (indentation), insert them
       if (targetText && typed.length < targetText.length) {
         let spaceCount = 0;
@@ -30,6 +34,20 @@ export function TypingArea({ statuses, typed, onInput, disabled, targetText }) {
         }
       }
       onInput(typed + "  ");
+      return;
+    }
+
+    if (event.key === " ") {
+      soundEngine.playSpace();
+    } else if (event.key === "Backspace") {
+      soundEngine.playBackspace();
+    } else if (
+      event.key.length === 1 &&
+      !event.ctrlKey &&
+      !event.metaKey &&
+      !event.altKey
+    ) {
+      soundEngine.playKey(event.key);
     }
   }
 

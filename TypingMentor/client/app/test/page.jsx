@@ -8,6 +8,9 @@ import { resultService } from "../../features/typing/services/resultService.js";
 import { TestModeSelector } from "../../features/typing/components/TestModeSelector.jsx";
 import { DurationSelector } from "../../features/typing/components/DurationSelector.jsx";
 import { LanguageSelector } from "../../features/typing/components/LanguageSelector.jsx";
+import { CustomTextModal } from "../../features/typing/components/CustomTextModal.jsx";
+import { SoundSelector } from "../../features/typing/components/SoundSelector.jsx";
+import { soundEngine } from "../../features/typing/utils/soundEngine.js";
 import { TypingArea } from "../../features/typing/components/TypingArea.jsx";
 import { TestControls } from "../../features/typing/components/TestControls.jsx";
 import { TestResult } from "../../features/typing/components/TestResult.jsx";
@@ -19,13 +22,18 @@ export default function TestPage() {
   const [language, setLanguage] = useState("javascript");
   const [passage, setPassage] = useState(() => getRandomPassage());
   const [codePassage, setCodePassage] = useState(() => getRandomCodePassage("javascript"));
+  const [customText, setCustomText] = useState(
+    "The quick brown fox jumps over the lazy dog."
+  );
+  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [saveStatus, setSaveStatus] = useState("idle");
 
   // Build the target text based on current mode.
   const targetText =
-    mode === "timed"   ? passage.text.repeat(4) :
-    mode === "passage" ? passage.text :
+    mode === "timed"   ? Array(8).fill(passage.text.trim()).join(" ") :
+    mode === "passage" ? passage.text.trim() :
+    mode === "custom"  ? customText.trim() :
     /* code */           codePassage.text;
 
   const isTimed = mode === "timed" || mode === "code";
@@ -48,6 +56,8 @@ export default function TestPage() {
     setMode(nextMode);
     if (nextMode === "code") {
       setCodePassage(getRandomCodePassage(language));
+    } else if (nextMode === "custom") {
+      setIsCustomModalOpen(true);
     } else {
       setPassage(getRandomPassage());
     }
@@ -71,7 +81,7 @@ export default function TestPage() {
   const restart = useCallback(() => {
     if (mode === "code") {
       setCodePassage(getRandomCodePassage(language));
-    } else {
+    } else if (mode === "timed" || mode === "passage") {
       setPassage(getRandomPassage());
     }
     setSaveStatus("idle");
@@ -79,17 +89,26 @@ export default function TestPage() {
     setAttempt((a) => a + 1);
   }, [mode, language, reset]);
 
+  const handleSaveCustomText = useCallback((newText) => {
+    setCustomText(newText);
+    setSaveStatus("idle");
+    setAttempt((a) => a + 1);
+  }, []);
+
   useEffect(() => {
-    if (isFinished && result && saveStatus === "idle") {
-      if (!isAuthenticated) {
-        setSaveStatus("skipped");
-        return;
+    if (isFinished && result) {
+      soundEngine.playCompletion();
+      if (saveStatus === "idle") {
+        if (!isAuthenticated) {
+          setSaveStatus("skipped");
+          return;
+        }
+        setSaveStatus("saving");
+        resultService
+          .submit(mode, result)
+          .then(() => setSaveStatus("saved"))
+          .catch(() => setSaveStatus("error"));
       }
-      setSaveStatus("saving");
-      resultService
-        .submit(mode, result)
-        .then(() => setSaveStatus("saved"))
-        .catch(() => setSaveStatus("error"));
     }
   }, [isFinished, result, isAuthenticated, mode, saveStatus]);
 
@@ -113,6 +132,22 @@ export default function TestPage() {
             <LanguageSelector language={language} onChange={handleLanguageChange} />
           </>
         )}
+
+        {mode === "custom" && (
+          <>
+            <span className="mx-1 font-bold text-nb-sub">·</span>
+            <button
+              type="button"
+              onClick={() => setIsCustomModalOpen(true)}
+              className="border-2 border-nb-border bg-nb-yellow px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-nb-text shadow-nb-sm hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
+            >
+              Edit Text
+            </button>
+          </>
+        )}
+
+        <span className="mx-1 font-bold text-nb-sub">·</span>
+        <SoundSelector />
       </div>
 
       {/* Code snippet label (shown only in code mode) */}
@@ -122,6 +157,17 @@ export default function TestPage() {
             <span>{codePassage.language}</span>
             <span className="text-nb-text/50">·</span>
             <span>{codePassage.label}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Custom text label (shown only in custom mode) */}
+      {mode === "custom" && !isFinished && (
+        <div className="mb-4 flex justify-start">
+          <div className="inline-flex items-center gap-2 border-2 border-nb-border bg-nb-yellow px-3 py-1 text-xs font-bold uppercase tracking-widest shadow-nb-sm">
+            <span>Custom Text</span>
+            <span className="text-nb-text/50">·</span>
+            <span>{customText.trim().split(/\s+/).filter(Boolean).length} Words</span>
           </div>
         </div>
       )}
@@ -150,6 +196,14 @@ export default function TestPage() {
           saveStatus={saveStatus}
         />
       )}
+
+      {/* Custom text modal */}
+      <CustomTextModal
+        isOpen={isCustomModalOpen}
+        onClose={() => setIsCustomModalOpen(false)}
+        onSave={handleSaveCustomText}
+        currentText={customText}
+      />
     </div>
   );
 }

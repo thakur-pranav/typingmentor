@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const submitResultSchema = z.object({
-  mode: z.enum(["timed", "passage", "code"]),
+  mode: z.enum(["timed", "passage", "code", "custom"]),
   duration: z.number().min(0),
   wpm: z.number().min(0),
   netWpm: z.number().min(0),
@@ -15,5 +15,7 @@ export const submitResultSchema = z.object({
 
 export const historyQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(50).default(10),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
+  mode: z.enum(["timed", "passage", "code", "custom"]).optional(),
+  duration: z.coerce.number().int().positive().optional(),
 });

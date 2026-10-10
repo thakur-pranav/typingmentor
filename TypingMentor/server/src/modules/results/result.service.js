@@ -14,8 +14,8 @@ export const resultService = {
     return resultRepository.create(userId, input);
   },
 
-  async getHistory(userId, page, limit) {
-    const { results, total } = await resultRepository.findHistory(userId, page, limit);
+  async getHistory(userId, page, limit, filter = {}) {
+    const { results, total } = await resultRepository.findHistory(userId, page, limit, filter);
     return {
       results,
       page,

@@ -6,9 +6,24 @@ import { ResultModel } from "../results/result.model.js";
  * single $lookup so we avoid N+1 queries against the users collection.
  */
 export const leaderboardRepository = {
-  getTopUsers(limit, skip = 0) {
-    return ResultModel.aggregate([
-      { $sort: { wpm: -1 } },
+  getTopUsers(limit, skip = 0, filter = {}) {
+    const match = {};
+    if (filter.mode) {
+      match.mode = filter.mode;
+    } else {
+      match.mode = { $in: ["timed", "passage", "code"] };
+    }
+    if (filter.duration) {
+      match.duration = Number(filter.duration);
+    }
+
+    const pipeline = [];
+    if (Object.keys(match).length > 0) {
+      pipeline.push({ $match: match });
+    }
+
+    pipeline.push(
+      { $sort: { wpm: -1, accuracy: -1 } },
       {
         $group: {
           _id: "$userId",
@@ -26,7 +41,9 @@ export const leaderboardRepository = {
           foreignField: "_id",
           as: "user",
         },
-      },
-    ]).exec();
+      }
+    );
+
+    return ResultModel.aggregate(pipeline).exec();
   },
 };

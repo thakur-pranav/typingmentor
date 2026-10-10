@@ -1,1 +1,1 @@
-export const TEST_MODES = ["timed", "passage", "code"];
+export const TEST_MODES = ["timed", "passage", "code", "custom"];

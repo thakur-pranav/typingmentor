@@ -1,4 +1,32 @@
+"use client";
+
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { AnimatedNumber } from "../../../components/ui/AnimatedNumber.jsx";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.05,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 14 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 350,
+      damping: 26,
+    },
+  },
+};
 
 export function TestResult({
   result,
@@ -8,7 +36,12 @@ export function TestResult({
   saveStatus,
 }) {
   return (
-    <div className="flex flex-col gap-8">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="flex flex-col gap-8"
+    >
 
       {/* ── Hero + graph ── */}
       <div className="flex flex-col gap-6 lg:flex-row lg:items-stretch lg:gap-6">
@@ -16,41 +49,44 @@ export function TestResult({
         {/* Hero stat cards */}
         <div className="flex flex-col gap-4 shrink-0">
           <HeroStat label="WPM" value={result.wpm} accent="yellow" />
-          <HeroStat label="Accuracy" value={`${result.accuracy}%`} accent="cyan" />
+          <HeroStat label="Accuracy" value={result.accuracy} suffix="%" accent="cyan" />
         </div>
 
         {/* Graph */}
         {wpmHistory.length >= 2 && (
-          <div className="flex-1 min-w-0 border-2 border-nb-border bg-nb-card p-4 shadow-nb">
+          <motion.div
+            variants={itemVariants}
+            className="flex-1 min-w-0 border-2 border-nb-border bg-nb-card p-4 shadow-nb"
+          >
             <p className="mb-2 text-xs font-bold uppercase tracking-widest text-nb-sub">
               WPM over time
             </p>
             <WpmGraph wpmHistory={wpmHistory} />
-          </div>
+          </motion.div>
         )}
       </div>
 
       {/* ── Secondary stats ── */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+      <motion.div variants={containerVariants} className="grid grid-cols-2 gap-3 sm:grid-cols-5">
         <SecStat label="Net WPM"   value={result.netWpm}                     />
         <SecStat label="Correct"   value={result.correctCharacters}          />
         <SecStat label="Incorrect" value={result.incorrectCharacters}        />
-        <SecStat label="Time"      value={`${Math.round(result.duration)}s`} />
+        <SecStat label="Time"      value={Math.round(result.duration)} suffix="s" />
         <SecStat label="Chars"     value={result.totalCharacters}            />
-      </div>
+      </motion.div>
 
       {/* ── Save status ── */}
       {(isAuthenticated || saveStatus === "skipped") && (
-        <p className="border-l-4 border-nb-border pl-3 text-sm font-medium text-nb-sub">
+        <motion.p variants={itemVariants} className="border-l-4 border-nb-border pl-3 text-sm font-medium text-nb-sub">
           {!isAuthenticated                           && "Log in to save results to your history."}
           {isAuthenticated && saveStatus === "saving" && "Saving result…"}
           {isAuthenticated && saveStatus === "saved"  && "✓ Result saved."}
           {isAuthenticated && saveStatus === "error"  && "✗ Could not save result."}
-        </p>
+        </motion.p>
       )}
 
       {/* ── Actions ── */}
-      <div className="flex flex-wrap items-center gap-3">
+      <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-3">
         <button
           onClick={onRestart}
           className="flex items-center gap-2 border-2 border-nb-border bg-nb-yellow px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-nb-text shadow-nb transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
@@ -74,8 +110,8 @@ export function TestResult({
         >
           Leaderboard
         </Link>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -131,14 +167,40 @@ function WpmGraph({ wpmHistory }) {
           stroke="#e5e0d0" strokeWidth="1" />
       ))}
 
-      {/* Fill + curve */}
-      <path d={fill} fill="#ffd60a" fillOpacity="0.18" />
-      <path d={line} fill="none" stroke="#0d0d0d" strokeWidth="2.5"
-        strokeLinecap="round" strokeLinejoin="round" />
+      {/* Fill + curve animated */}
+      <motion.path
+        d={fill}
+        fill="#ffd60a"
+        initial={{ fillOpacity: 0 }}
+        animate={{ fillOpacity: 0.18 }}
+        transition={{ delay: 0.4, duration: 0.6 }}
+      />
+      <motion.path
+        d={line}
+        fill="none"
+        stroke="#0d0d0d"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 1.0, ease: "easeOut" }}
+      />
 
-      {/* Dots */}
+      {/* Dots animated */}
       {pts.map(([x, y], i) => (
-        <circle key={i} cx={x} cy={y} r="3" fill="#ffd60a" stroke="#0d0d0d" strokeWidth="1.5" />
+        <motion.circle
+          key={i}
+          cx={x}
+          cy={y}
+          r="3"
+          fill="#ffd60a"
+          stroke="#0d0d0d"
+          strokeWidth="1.5"
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.25 + (i / Math.max(n - 1, 1)) * 0.75, duration: 0.2 }}
+        />
       ))}
 
       {/* Y labels */}
@@ -164,23 +226,30 @@ function WpmGraph({ wpmHistory }) {
 
 /* ── Helpers ── */
 
-function HeroStat({ label, value, accent }) {
+function HeroStat({ label, value, suffix = "", accent }) {
   const bg = accent === "yellow" ? "bg-nb-yellow" : "bg-nb-cyan";
   return (
-    <div className={`border-2 border-nb-border ${bg} p-6 shadow-nb`}>
+    <motion.div variants={itemVariants} className={`border-2 border-nb-border ${bg} p-6 shadow-nb`}>
       <p className="text-xs font-bold uppercase tracking-widest text-nb-text/60">{label}</p>
       <p className="mt-1 font-mono text-6xl font-black tabular-nums text-nb-text leading-none">
-        {value}
+        <AnimatedNumber value={value} suffix={suffix} duration={1.1} />
       </p>
-    </div>
+    </motion.div>
   );
 }
 
-function SecStat({ label, value }) {
+function SecStat({ label, value, suffix = "", isNumeric = true }) {
   return (
-    <div className="border-2 border-nb-border bg-nb-card p-4 shadow-nb-sm">
+    <motion.div variants={itemVariants} className="border-2 border-nb-border bg-nb-card p-4 shadow-nb-sm">
       <p className="text-[10px] font-bold uppercase tracking-widest text-nb-sub">{label}</p>
-      <p className="mt-1 font-mono text-2xl font-bold tabular-nums text-nb-text">{value}</p>
-    </div>
+      <p className="mt-1 font-mono text-2xl font-bold tabular-nums text-nb-text">
+        {isNumeric ? (
+          <AnimatedNumber value={value} suffix={suffix} duration={0.9} />
+        ) : (
+          value
+        )}
+      </p>
+    </motion.div>
   );
 }
+

@@ -3,10 +3,10 @@ import { leaderboardRepository } from "./leaderboard.repository.js";
 const MAX_LEADERBOARD_SIZE = 100;
 
 export const leaderboardService = {
-  async getLeaderboard(page, limit) {
+  async getLeaderboard(page, limit, filter = {}) {
     const effectiveLimit = Math.min(limit, MAX_LEADERBOARD_SIZE);
     const skip = (page - 1) * effectiveLimit;
-    const rows = await leaderboardRepository.getTopUsers(effectiveLimit, skip);
+    const rows = await leaderboardRepository.getTopUsers(effectiveLimit, skip, filter);
 
     return rows
       .filter((row) => row.user.length > 0)

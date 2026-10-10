@@ -1,10 +1,12 @@
 import axios from "axios";
 import { getToken, clearToken } from "../auth/tokenStorage.js";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
+const rawApiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
+const cleanApiUrl = rawApiUrl.replace(/\/+$/, "");
+const baseURL = cleanApiUrl.endsWith("/api") ? cleanApiUrl : `${cleanApiUrl}/api`;
 
 export const apiClient = axios.create({
-  baseURL: `${API_URL}/api`,
+  baseURL,
   headers: { "Content-Type": "application/json" },
 });
 

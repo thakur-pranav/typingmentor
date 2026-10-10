@@ -6,7 +6,7 @@ export function RecentTestsTable({ tests }) {
   }
 
   return (
-    <div className="overflow-x-auto border-2 border-nb-border shadow-nb">
+    <div className="w-full overflow-x-auto border-2 border-nb-border shadow-nb">
       <table className="w-full text-left text-sm">
         <thead className="border-b-2 border-nb-border bg-nb-yellow">
           <tr>

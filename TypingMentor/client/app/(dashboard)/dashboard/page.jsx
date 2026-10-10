@@ -4,6 +4,7 @@ import { ProtectedRoute } from "../../../features/auth/components/ProtectedRoute
 import { useAsync } from "../../../hooks/useAsync.js";
 import { statisticsService } from "../../../features/dashboard/services/statisticsService.js";
 import { StatCard } from "../../../features/dashboard/components/StatCard.jsx";
+import { ProgressChart } from "../../../features/dashboard/components/ProgressChart.jsx";
 import { RecentTestsTable } from "../../../features/dashboard/components/RecentTestsTable.jsx";
 import { Skeleton } from "../../../components/ui/Skeleton.jsx";
 import { Alert } from "../../../components/ui/Alert.jsx";
@@ -13,10 +14,13 @@ function DashboardContent() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} className="h-24" />
-        ))}
+      <div className="space-y-6">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-24" />
+          ))}
+        </div>
+        <Skeleton className="h-64" />
       </div>
     );
   }
@@ -35,6 +39,8 @@ function DashboardContent() {
         <StatCard label="Total Tests" value={stats.totalTests} />
       </div>
 
+      <ProgressChart tests={stats.recentTests} averageWpm={stats.averageWpm} />
+
       <div>
         <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-nb-sub">Recent tests</h2>
         <RecentTestsTable tests={stats.recentTests} />
@@ -46,7 +52,7 @@ function DashboardContent() {
 export default function DashboardPage() {
   return (
     <ProtectedRoute>
-      <div className="mx-auto max-w-5xl space-y-8 px-6 py-12">
+      <div className="mx-auto w-full max-w-5xl space-y-8 px-6 py-12">
         <h1 className="text-3xl font-black uppercase tracking-tight text-nb-text">Dashboard</h1>
         <DashboardContent />
       </div>

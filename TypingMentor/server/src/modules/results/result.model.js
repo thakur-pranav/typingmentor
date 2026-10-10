@@ -3,7 +3,7 @@ import { Schema, model } from "mongoose";
 const resultSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
-    mode: { type: String, enum: ["timed", "passage", "code"], required: true },
+    mode: { type: String, enum: ["timed", "passage", "code", "custom"], required: true },
     duration: { type: Number, required: true, min: 0 },
     wpm: { type: Number, required: true, min: 0, index: true },
     netWpm: { type: Number, required: true, min: 0 },
@@ -17,6 +17,10 @@ const resultSchema = new Schema(
 
 // Supports "history for this user, most recent first" efficiently.
 resultSchema.index({ userId: 1, createdAt: -1 });
+
+// Supports filtered leaderboards by mode and duration ordered by highest WPM.
+resultSchema.index({ mode: 1, duration: 1, wpm: -1 });
+resultSchema.index({ mode: 1, wpm: -1 });
 
 resultSchema.set("toJSON", {
   transform: (_doc, ret) => {
