@@ -100,4 +100,85 @@ This link will expire in 24 hours. If you did not create an account, you can saf
 └─────────────────────────────────────────────────────────────────────────────┘
 `);
   },
+
+  async sendFeedbackNotification({ name, email, category, subject, message }) {
+    if (process.env.NODE_ENV === "test") {
+      return;
+    }
+
+    const adminEmail = process.env.ADMIN_EMAIL || "byteforgelabs.app@gmail.com";
+    const categoryLabel = category.toUpperCase();
+    const mailTransporter = getTransporter();
+
+    const categoryColors = {
+      suggestion: "#ffd60a",
+      bug: "#ff4d6d",
+      query: "#00b4d8",
+    };
+    const badgeColor = categoryColors[category] || "#ffd60a";
+
+    if (mailTransporter) {
+      try {
+        await mailTransporter.sendMail({
+          from: process.env.SMTP_FROM || `"TypingMentor Support" <byteforgelabs.app@gmail.com>`,
+          to: adminEmail,
+          replyTo: email,
+          subject: `[TypingMentor ${categoryLabel}] ${subject}`,
+          text: `New Feedback from ${name} (${email})
+Category: ${categoryLabel}
+Subject: ${subject}
+
+Message:
+${message}
+`,
+          html: `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; border: 3px solid #0d0d0d; background: #ffffff; box-shadow: 4px 4px 0 #0d0d0d;">
+              <div style="border-bottom: 2px solid #0d0d0d; padding-bottom: 16px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between;">
+                <h1 style="font-size: 20px; font-weight: 900; text-transform: uppercase; margin: 0; color: #0d0d0d; letter-spacing: -0.5px;">
+                  TypingMentor Feedback
+                </h1>
+                <span style="display: inline-block; background-color: ${badgeColor}; color: #0d0d0d; border: 2px solid #0d0d0d; padding: 4px 10px; font-weight: 900; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">
+                  ${categoryLabel}
+                </span>
+              </div>
+              
+              <div style="background-color: #f4f1ea; border: 2px solid #0d0d0d; padding: 16px; margin-bottom: 20px;">
+                <p style="margin: 0 0 8px 0; font-size: 13px;"><strong>From:</strong> ${name} &lt;<a href="mailto:${email}" style="color: #0d0d0d;">${email}</a>&gt;</p>
+                <p style="margin: 0; font-size: 13px;"><strong>Subject:</strong> ${subject}</p>
+              </div>
+
+              <div style="margin: 24px 0;">
+                <h2 style="font-size: 12px; font-weight: 900; text-transform: uppercase; color: #666666; margin: 0 0 8px 0; letter-spacing: 0.5px;">
+                  User Message:
+                </h2>
+                <div style="background: #ffffff; border: 2px solid #0d0d0d; padding: 18px; font-size: 14px; line-height: 1.6; color: #111111; white-space: pre-wrap;">
+${message}
+                </div>
+              </div>
+
+              <div style="border-top: 1px solid #e5e5e5; margin-top: 28px; padding-top: 16px;">
+                <p style="font-size: 12px; color: #888888; margin: 0;">
+                  Click "Reply" to respond directly to ${email}.
+                </p>
+              </div>
+            </div>
+          `,
+        });
+        return;
+      } catch (err) {
+        console.error("Failed to send feedback email via SMTP:", err.message);
+      }
+    }
+
+    console.log(`
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 💬 [DEV FEEDBACK NOTIFICATION]                                             │
+│ Category: ${categoryLabel.padEnd(64)}│
+│ From:     ${name} <${email}>
+│ Subject:  ${subject}
+│ Message:  ${message.substring(0, 50)}...
+└─────────────────────────────────────────────────────────────────────────────┘
+`);
+  },
 };
+

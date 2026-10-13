@@ -25,6 +25,9 @@ apiClient.interceptors.response.use(
       clearToken();
     }
     const message = error.response?.data?.message ?? error.message ?? "Something went wrong";
-    return Promise.reject(new Error(message));
+    const customError = new Error(message);
+    customError.code = error.response?.data?.code;
+    customError.status = error.response?.status;
+    return Promise.reject(customError);
   }
 );

@@ -35,6 +35,7 @@ export function Navbar() {
         <div className="flex items-center gap-1 text-sm font-bold">
           <NavLink href="/test">Test</NavLink>
           <NavLink href="/leaderboard">Leaderboard</NavLink>
+          <NavLink href="/feedback">Feedback</NavLink>
 
           {isAuthenticated ? (
             <>

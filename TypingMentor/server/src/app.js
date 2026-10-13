@@ -10,6 +10,7 @@ import { typingRoutes } from "./modules/typing/index.js";
 import { resultRoutes } from "./modules/results/index.js";
 import { leaderboardRoutes } from "./modules/leaderboard/index.js";
 import { statisticsRoutes } from "./modules/statistics/index.js";
+import { feedbackRoutes } from "./modules/feedback/index.js";
 
 export function createApp() {
   const app = express();
@@ -49,6 +50,7 @@ export function createApp() {
   app.use("/api/results", resultRoutes);
   app.use("/api/leaderboard", leaderboardRoutes);
   app.use("/api/statistics", statisticsRoutes);
+  app.use("/api/feedback", feedbackRoutes);
 
   app.use(notFoundMiddleware);
   app.use(errorMiddleware);

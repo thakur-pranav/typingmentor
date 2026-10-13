@@ -3,12 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../../features/auth/hooks/AuthProvider.jsx";
 import { getRandomPassage, getRandomCodePassage } from "../../features/typing/utils/randomPassage.js";
+import { formatPassageText } from "../../features/typing/utils/formatPassageText.js";
 import { useTypingTest } from "../../features/typing/hooks/useTypingTest.js";
 import { resultService } from "../../features/typing/services/resultService.js";
 import { TestModeSelector } from "../../features/typing/components/TestModeSelector.jsx";
 import { DurationSelector } from "../../features/typing/components/DurationSelector.jsx";
 import { LanguageSelector } from "../../features/typing/components/LanguageSelector.jsx";
 import { CustomTextModal } from "../../features/typing/components/CustomTextModal.jsx";
+import { PunctuationSelector } from "../../features/typing/components/PunctuationSelector.jsx";
 import { SoundSelector } from "../../features/typing/components/SoundSelector.jsx";
 import { soundEngine } from "../../features/typing/utils/soundEngine.js";
 import { TypingArea } from "../../features/typing/components/TypingArea.jsx";
@@ -26,14 +28,29 @@ export default function TestPage() {
     "The quick brown fox jumps over the lazy dog."
   );
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
+  const [hasPunctuation, setHasPunctuation] = useState(true);
   const [attempt, setAttempt] = useState(0);
   const [saveStatus, setSaveStatus] = useState("idle");
 
+  // Load persisted punctuation preference
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("typingmentor_punctuation");
+      if (saved !== null) {
+        setHasPunctuation(saved === "true");
+      }
+    } catch (_) {}
+  }, []);
+
+  // Format base passage and custom text according to punctuation flag.
+  const basePassage = formatPassageText(passage.text, hasPunctuation);
+  const baseCustom = formatPassageText(customText, hasPunctuation);
+
   // Build the target text based on current mode.
   const targetText =
-    mode === "timed"   ? Array(8).fill(passage.text.trim()).join(" ") :
-    mode === "passage" ? passage.text.trim() :
-    mode === "custom"  ? customText.trim() :
+    mode === "timed"   ? Array(8).fill(basePassage).join(" ") :
+    mode === "passage" ? basePassage :
+    mode === "custom"  ? baseCustom :
     /* code */           codePassage.text;
 
   const isTimed = mode === "timed" || mode === "code";
@@ -67,6 +84,15 @@ export default function TestPage() {
 
   const handleDurationChange = useCallback((nextDuration) => {
     setDuration(nextDuration);
+    setSaveStatus("idle");
+    setAttempt((a) => a + 1);
+  }, []);
+
+  const handlePunctuationChange = useCallback((nextVal) => {
+    setHasPunctuation(nextVal);
+    try {
+      localStorage.setItem("typingmentor_punctuation", String(nextVal));
+    } catch (_) {}
     setSaveStatus("idle");
     setAttempt((a) => a + 1);
   }, []);
@@ -146,6 +172,16 @@ export default function TestPage() {
           </>
         )}
 
+        {mode !== "code" && (
+          <>
+            <span className="mx-1 font-bold text-nb-sub">·</span>
+            <PunctuationSelector
+              hasPunctuation={hasPunctuation}
+              onChange={handlePunctuationChange}
+            />
+          </>
+        )}
+
         <span className="mx-1 font-bold text-nb-sub">·</span>
         <SoundSelector />
       </div>
@@ -167,7 +203,9 @@ export default function TestPage() {
           <div className="inline-flex items-center gap-2 border-2 border-nb-border bg-nb-yellow px-3 py-1 text-xs font-bold uppercase tracking-widest shadow-nb-sm">
             <span>Custom Text</span>
             <span className="text-nb-text/50">·</span>
-            <span>{customText.trim().split(/\s+/).filter(Boolean).length} Words</span>
+            <span>{baseCustom.split(/\s+/).filter(Boolean).length} Words</span>
+            <span className="text-nb-text/50">·</span>
+            <span>{hasPunctuation ? "Punctuation ON" : "No Punctuation"}</span>
           </div>
         </div>
       )}
