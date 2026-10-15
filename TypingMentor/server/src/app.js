@@ -15,6 +15,8 @@ import { feedbackRoutes } from "./modules/feedback/index.js";
 export function createApp() {
   const app = express();
 
+  app.set("trust proxy", 1);
+
   app.use(helmet());
 
   const clientOrigins = (env.clientUrl || "http://localhost:3000")
