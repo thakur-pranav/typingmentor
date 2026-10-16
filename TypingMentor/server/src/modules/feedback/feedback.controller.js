@@ -12,13 +12,12 @@ function getClientIp(req) {
 
 export const feedbackController = {
   submitFeedback: asyncHandler(async (req, res) => {
-    const { name, email, category, subject, message } = req.body;
-    const userId = req.auth?.userId ?? null;
+    const { name, category, subject, message } = req.body;
+    const userId = req.auth?.userId;
     const ip = getClientIp(req);
 
     const feedback = await feedbackService.submitFeedback({
       name,
-      email,
       category,
       subject,
       message,
@@ -35,13 +34,11 @@ export const feedbackController = {
   }),
 
   getCooldownStatus: asyncHandler(async (req, res) => {
-    const userId = req.auth?.userId ?? null;
-    const email = req.query?.email || req.auth?.email || null;
+    const userId = req.auth?.userId;
     const ip = getClientIp(req);
 
     const status = await feedbackService.getCooldownStatus({
       userId,
-      email,
       ip,
     });
 

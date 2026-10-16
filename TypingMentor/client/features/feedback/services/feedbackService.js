@@ -12,10 +12,8 @@ export const feedbackService = {
     return res.data;
   },
 
-  async getCooldownStatus(email = "") {
-    const res = await apiClient.get("/feedback/cooldown", {
-      params: email ? { email } : {},
-    });
+  async getCooldownStatus() {
+    const res = await apiClient.get("/feedback/cooldown");
     return res.data?.data;
   },
 };

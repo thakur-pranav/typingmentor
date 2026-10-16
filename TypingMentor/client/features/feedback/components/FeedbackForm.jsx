@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useAuth } from "../../auth/hooks/AuthProvider.jsx";
 import { feedbackService } from "../services/feedbackService.js";
 
@@ -31,11 +32,10 @@ const CATEGORIES = [
 ];
 
 export function FeedbackForm() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, isLoading, resendVerification } = useAuth();
 
   const [category, setCategory] = useState("suggestion");
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
 
@@ -44,6 +44,12 @@ export function FeedbackForm() {
   const [errorMessage, setErrorMessage] = useState("");
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
   const [showSpamModal, setShowSpamModal] = useState(false);
+
+  const [resendState, setResendState] = useState({
+    loading: false,
+    sent: false,
+    error: "",
+  });
 
   // Close spam modal on Escape key press
   useEffect(() => {
@@ -57,16 +63,17 @@ export function FeedbackForm() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [showSpamModal]);
 
-  // Initialize name and email if logged in
+  // Pre-fill name from authenticated user profile
   useEffect(() => {
-    if (isAuthenticated && user) {
-      if (!name) setName(user.username || "");
-      if (!email) setEmail(user.email || "");
+    if (isAuthenticated && user?.username && !name) {
+      setName(user.username);
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, name]);
 
-  // Check local storage and server for cooldown
+  // Check local storage and server for cooldown (only when authenticated)
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     function calculateLocalCooldown() {
       const storedUntil = localStorage.getItem(COOLDOWN_STORAGE_KEY);
       if (storedUntil) {
@@ -81,10 +88,8 @@ export function FeedbackForm() {
       setCooldownSeconds(localRemaining);
     }
 
-    // Query server cooldown status
-    const queryEmail = email || user?.email || "";
     feedbackService
-      .getCooldownStatus(queryEmail)
+      .getCooldownStatus()
       .then((status) => {
         if (status && !status.canSubmit && status.remainingSeconds > 0) {
           const serverRemaining = status.remainingSeconds;
@@ -93,9 +98,9 @@ export function FeedbackForm() {
         }
       })
       .catch(() => {
-        // Silent fail on check, local timer still functions
+        // Silent fail on background status check
       });
-  }, [email, user]);
+  }, [isAuthenticated]);
 
   // Tick down cooldown timer
   useEffect(() => {
@@ -120,6 +125,21 @@ export function FeedbackForm() {
     return mins > 0 ? `${mins}m ${secs < 10 ? "0" : ""}${secs}s` : `${secs}s`;
   }
 
+  async function handleResendVerification() {
+    if (!user?.email) return;
+    setResendState({ loading: true, sent: false, error: "" });
+    try {
+      await resendVerification(user.email);
+      setResendState({ loading: false, sent: true, error: "" });
+    } catch (err) {
+      setResendState({
+        loading: false,
+        sent: false,
+        error: err.message || "Failed to resend verification link.",
+      });
+    }
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     if (cooldownSeconds > 0) {
@@ -134,7 +154,6 @@ export function FeedbackForm() {
     try {
       await feedbackService.submitFeedback({
         name,
-        email,
         category,
         subject,
         message,
@@ -151,10 +170,6 @@ export function FeedbackForm() {
 
       setSubject("");
       setMessage("");
-      if (!isAuthenticated) {
-        setName("");
-        setEmail("");
-      }
     } catch (err) {
       if (err.code === "FEEDBACK_COOLDOWN_ACTIVE" || err.status === 429) {
         if (err.remainingSeconds) {
@@ -171,6 +186,10 @@ export function FeedbackForm() {
           );
         }
         setShowSpamModal(true);
+      } else if (err.code === "EMAIL_NOT_VERIFIED" || err.status === 403) {
+        setErrorMessage(
+          "Your email address is not yet verified. Please verify your email before submitting feedback."
+        );
       } else {
         const msg = err.message || "Failed to submit feedback. Please try again.";
         setErrorMessage(msg);
@@ -180,8 +199,133 @@ export function FeedbackForm() {
     }
   }
 
+  // 1. Loading State
+  if (isLoading) {
+    return (
+      <div className="border-2 border-nb-border bg-nb-card p-8 shadow-nb flex flex-col items-center justify-center min-h-[220px] text-nb-sub font-mono text-xs sm:text-sm animate-pulse space-y-2">
+        <span className="text-2xl">⏳</span>
+        <span>Checking account authentication status...</span>
+      </div>
+    );
+  }
+
+  // 2. Unauthenticated State (Stop anonymous users with dummy emails)
+  if (!isAuthenticated) {
+    return (
+      <div className="border-2 border-nb-border bg-nb-card p-6 sm:p-8 shadow-nb space-y-6">
+        <div className="flex items-start gap-4">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-nb-border bg-nb-yellow text-2xl shadow-nb-sm">
+            🔒
+          </span>
+          <div className="space-y-1">
+            <div className="text-[10px] font-black uppercase tracking-widest text-nb-sub">
+              Verified Account Required
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-nb-text">
+              Sign In to Send Feedback
+            </h2>
+            <p className="text-xs sm:text-sm font-medium text-nb-sub leading-relaxed">
+              To protect our inbox against automated spam and non-existent dummy emails, you must be
+              signed in with a verified TypingMentor account to submit feedback, bug reports, or feature
+              inquiries.
+            </p>
+          </div>
+        </div>
+
+        <div className="border-2 border-nb-border bg-nb-bg p-4 sm:p-5 shadow-nb-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-xs font-bold text-nb-text">
+            Have an account or want to register?
+          </div>
+          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+            <Link
+              href="/login?redirect=/feedback"
+              className="flex-1 sm:flex-initial text-center border-2 border-nb-border bg-nb-yellow px-5 py-2.5 text-xs font-black uppercase tracking-wider text-nb-text shadow-nb transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-nb-sm active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
+            >
+              Log In →
+            </Link>
+            <Link
+              href="/register?redirect=/feedback"
+              className="flex-1 sm:flex-initial text-center border-2 border-nb-border bg-white px-5 py-2.5 text-xs font-black uppercase tracking-wider text-nb-text shadow-nb transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-nb-sm active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
+            >
+              Create Account
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. Authenticated but Email Not Verified State
+  if (user && user.isEmailVerified === false) {
+    return (
+      <div className="border-2 border-nb-border bg-nb-card p-6 sm:p-8 shadow-nb space-y-6">
+        <div className="flex items-start gap-4">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-nb-border bg-nb-pink text-2xl text-white shadow-nb-sm">
+            ✉️
+          </span>
+          <div className="space-y-1">
+            <div className="text-[10px] font-black uppercase tracking-widest text-nb-pink font-bold">
+              Email Verification Pending
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-nb-text">
+              Verify Your Email to Continue
+            </h2>
+            <p className="text-xs sm:text-sm font-medium text-nb-sub leading-relaxed">
+              Your account email (<span className="font-bold text-nb-text">{user.email}</span>) has
+              not yet been verified. Only users with a verified email address can send feedback or support
+              requests to our team.
+            </p>
+          </div>
+        </div>
+
+        {resendState.sent ? (
+          <div className="border-2 border-nb-border bg-nb-green p-4 text-xs font-bold text-nb-text shadow-nb-sm">
+            ✓ A new verification link has been sent to {user.email}! Please check your inbox and click
+            the link to activate your account.
+          </div>
+        ) : (
+          <div className="space-y-2 pt-2">
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+              <button
+                type="button"
+                disabled={resendState.loading}
+                onClick={handleResendVerification}
+                className="w-full sm:w-auto border-2 border-nb-border bg-nb-yellow px-5 py-2.5 text-xs font-black uppercase tracking-wider text-nb-text shadow-nb transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-nb-sm active:translate-x-[4px] active:translate-y-[4px] active:shadow-none disabled:bg-gray-200 cursor-pointer"
+              >
+                {resendState.loading ? "Sending link..." : "Resend Verification Link →"}
+              </button>
+            </div>
+            {resendState.error && (
+              <p className="text-xs font-bold text-nb-pink">{resendState.error}</p>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // 4. Authenticated & Verified State (Full interactive form)
   return (
     <div className="border-2 border-nb-border bg-nb-card p-4 sm:p-8 shadow-nb">
+      {/* Verified User Banner */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-2 border-nb-border bg-nb-bg p-3.5 shadow-nb-sm">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-6 w-6 items-center justify-center border border-nb-border bg-nb-green text-xs font-black text-nb-text">
+            ✓
+          </span>
+          <span className="text-xs font-bold text-nb-text">
+            Submitting as <span className="font-black text-nb-text">{user?.username}</span>
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5 border border-nb-border bg-white px-2.5 py-1 text-[11px] font-mono font-bold text-nb-sub">
+          <span>🔒</span>
+          <span>{user?.email}</span>
+          <span className="ml-1 bg-nb-green text-nb-text px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider">
+            VERIFIED
+          </span>
+        </div>
+      </div>
+
       {/* Category Tabs */}
       <div className="mb-6">
         <label className="mb-2 block text-xs font-black uppercase tracking-wider text-nb-text">
@@ -253,21 +397,28 @@ export function FeedbackForm() {
           </div>
 
           <div>
-            <label
-              htmlFor="feedback-email"
-              className="mb-1 block text-xs font-black uppercase tracking-wider text-nb-text"
-            >
-              Your Email *
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label
+                htmlFor="feedback-email"
+                className="block text-xs font-black uppercase tracking-wider text-nb-text"
+              >
+                Your Email *
+              </label>
+              <span className="text-[10px] font-black uppercase tracking-wider text-green-700 bg-green-100 border border-green-400 px-1.5 py-0.5">
+                ✓ Verified
+              </span>
+            </div>
             <input
               id="feedback-email"
               type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="alex@example.com"
-              className="w-full border-2 border-nb-border bg-white px-3 py-2 text-sm font-medium text-nb-text placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-nb-yellow"
+              readOnly
+              value={user?.email || ""}
+              className="w-full border-2 border-nb-border bg-gray-100 px-3 py-2 text-sm font-bold text-gray-700 cursor-not-allowed select-none focus:outline-none"
+              title="Your verified email address is locked to prevent identity spoofing"
             />
+            <span className="mt-1 block text-[10px] font-medium text-nb-sub">
+              🔒 Bound to your verified account email. Cannot be altered.
+            </span>
           </div>
         </div>
 

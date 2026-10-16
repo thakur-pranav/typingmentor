@@ -7,9 +7,10 @@ export const createFeedbackSchema = z.object({
     .min(2, "Name must be at least 2 characters")
     .max(60, "Name must be at most 60 characters"),
   email: z
-    .string({ required_error: "Email is required" })
+    .string()
     .trim()
-    .email("A valid email address is required"),
+    .email("A valid email address is required")
+    .optional(),
   category: z.enum(["suggestion", "bug", "query"], {
     required_error: "Please select a category (suggestion, bug, or query)",
   }),

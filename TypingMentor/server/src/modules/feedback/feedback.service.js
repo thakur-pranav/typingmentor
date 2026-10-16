@@ -1,6 +1,7 @@
 import { feedbackRepository } from "./feedback.repository.js";
 import { mailService } from "../auth/mail.service.js";
 import { ApiError } from "../../utils/ApiError.js";
+import { UserModel } from "../users/user.model.js";
 
 const COOLDOWN_MINUTES = 15;
 const COOLDOWN_MS = COOLDOWN_MINUTES * 60 * 1000;
@@ -8,11 +9,11 @@ const COOLDOWN_MS = COOLDOWN_MINUTES * 60 * 1000;
 function buildCooldownQuery({ userId, email, ip, thresholdDate }) {
   const orConditions = [];
 
-  if (email) {
-    orConditions.push({ email: email.toLowerCase() });
-  }
   if (userId) {
     orConditions.push({ userId });
+  }
+  if (email) {
+    orConditions.push({ email: email.toLowerCase() });
   }
   if (ip && ip !== "127.0.0.1" && ip !== "::1") {
     orConditions.push({ ip });
@@ -25,7 +26,27 @@ function buildCooldownQuery({ userId, email, ip, thresholdDate }) {
 }
 
 export const feedbackService = {
-  async submitFeedback({ name, email, category, subject, message, userId = null, ip = null }) {
+  async submitFeedback({ name, category, subject, message, userId, ip = null }) {
+    if (!userId) {
+      throw ApiError.unauthorized("Authentication is required to submit feedback");
+    }
+
+    const user = await UserModel.findById(userId).select("isEmailVerified email");
+    if (!user) {
+      throw ApiError.unauthorized("User account not found");
+    }
+
+    if (!user.isEmailVerified) {
+      throw new ApiError(
+        403,
+        "Please verify your email address before sending feedback. Check your inbox for the verification link.",
+        true,
+        "EMAIL_NOT_VERIFIED"
+      );
+    }
+
+    const email = user.email.toLowerCase();
+
     const thresholdDate = new Date(Date.now() - COOLDOWN_MS);
     const query = buildCooldownQuery({ userId, email, ip, thresholdDate });
 
@@ -49,7 +70,7 @@ export const feedbackService = {
 
     const created = await feedbackRepository.create({
       name,
-      email: email.toLowerCase(),
+      email,
       category,
       subject,
       message,
@@ -73,7 +94,14 @@ export const feedbackService = {
     return created;
   },
 
-  async getCooldownStatus({ userId = null, email = null, ip = null }) {
+  async getCooldownStatus({ userId, ip = null }) {
+    if (!userId) {
+      return { canSubmit: false, remainingSeconds: 0 };
+    }
+
+    const user = await UserModel.findById(userId).select("email");
+    const email = user?.email?.toLowerCase() || null;
+
     const thresholdDate = new Date(Date.now() - COOLDOWN_MS);
     const query = buildCooldownQuery({ userId, email, ip, thresholdDate });
 
