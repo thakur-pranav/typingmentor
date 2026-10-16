@@ -2,8 +2,8 @@ import { Button } from "../../components/ui/Button.jsx";
 import { Card } from "../../components/ui/Card.jsx";
 
 const FEATURES = [
-  { title: "Timed & passage modes", body: "Race the clock in 15–120s sprints, or complete a full passage at your own pace.", accent: "yellow" },
-  { title: "Real-time accuracy", body: "Every keystroke counts — even ones you backspaced. Accuracy is honest here.", accent: "cyan" },
+  { title: "Standard & code modes", body: "Race the clock in 15–120s sprints, type passages, practice real code, or paste custom text.", accent: "yellow" },
+  { title: "Honest accuracy", body: "Every keystroke counts — even ones you backspaced. Accuracy is honest and uninflated.", accent: "cyan" },
   { title: "Track your history", body: "Every saved test is logged so you can see your progress over time.", accent: "pink" },
   { title: "Global leaderboard", body: "Compare your best WPM against typists from around the world.", accent: "green" },
 ];
@@ -22,7 +22,7 @@ export default function LandingPage() {
             Type.<br />Compete.<br />Improve.
           </h1>
           <p className="mt-4 sm:mt-6 text-sm sm:text-base font-medium text-nb-sub">
-            TypingMentor is a typing speed platform with real-time WPM, honest accuracy tracking, and a global leaderboard.
+            TypingMentor is a distraction-free typing speed platform with pure scoring metrics, honest accuracy tracking, and a global leaderboard.
           </p>
           <div className="mt-6 sm:mt-8 flex flex-wrap gap-3">
             <Button href="/test">Start Typing</Button>
@@ -70,7 +70,7 @@ export default function LandingPage() {
         <div className="border-2 border-nb-border bg-nb-card p-6 shadow-nb">
           <h3 className="text-sm font-black uppercase tracking-wide text-nb-text">How is WPM calculated?</h3>
           <p className="mt-3 text-sm text-nb-sub">
-            5 characters = 1 word. WPM = total chars ÷ 5 ÷ minutes. Net WPM subtracts an error penalty. Accuracy counts every keypress — including ones you backspaced.
+            5 characters = 1 standard word. Core WPM counts characters in 100% correct words only (÷ 5 ÷ minutes). Raw WPM captures pure mechanical finger speed across all keystrokes. Accuracy counts every keypress — including typos you backspaced and corrected.
           </p>
         </div>
       </section>

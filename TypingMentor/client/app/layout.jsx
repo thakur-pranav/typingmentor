@@ -6,7 +6,7 @@ import { Footer } from "../components/layout/Footer.jsx";
 export const metadata = {
   title: "TypingMentor",
   description:
-    "TypingMentor is a typing speed platform: take timed and passage tests, track WPM and accuracy, and compete on the leaderboard.",
+    "TypingMentor is a distraction-free typing speed platform: take timed, passage, and code tests, track pure WPM and accuracy, and compete on global leaderboards.",
   icons: {
     icon: "/icon.svg",
   },
