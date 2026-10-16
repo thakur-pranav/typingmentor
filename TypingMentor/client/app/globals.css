@@ -13,6 +13,17 @@ body {
   background-color: #fffbf0;
   color: #0d0d0d;
   font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Hide scrollbar utility for touch-swipe tracks */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 * {

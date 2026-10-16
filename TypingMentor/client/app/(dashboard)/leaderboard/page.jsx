@@ -41,20 +41,21 @@ export default function LeaderboardPage() {
       : "All Categories";
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6 px-6 py-12">
+    <div className="mx-auto w-full max-w-4xl space-y-6 px-4 sm:px-6 py-6 sm:py-12">
       <div>
-        <h1 className="text-3xl font-black uppercase tracking-tight text-nb-text">
+        <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-nb-text">
           Global Leaderboard
         </h1>
-        <p className="mt-1 text-sm font-bold uppercase tracking-wider text-nb-sub">
+        <p className="mt-1 text-xs sm:text-sm font-bold uppercase tracking-wider text-nb-sub">
           Category: <span className="text-nb-text">{activeCategoryLabel}</span>
           {entries && ` · ${entries.length} typists ranked`}
         </p>
       </div>
 
       {/* Unboxed Segmented Toolbar */}
-      <div className="flex flex-wrap items-center justify-start gap-2">
-        <div role="tablist" aria-label="Leaderboard mode" className="inline-flex flex-wrap gap-2">
+      <div className="w-full overflow-x-auto no-scrollbar py-1">
+        <div className="flex items-center justify-start gap-2 min-w-max">
+          <div role="tablist" aria-label="Leaderboard mode" className="inline-flex gap-2">
           {MODE_OPTIONS.map((opt) => (
             <button
               key={opt.value}
@@ -98,6 +99,7 @@ export default function LeaderboardPage() {
             </div>
           </>
         )}
+        </div>
       </div>
 
       {isLoading && <Skeleton className="h-64" />}

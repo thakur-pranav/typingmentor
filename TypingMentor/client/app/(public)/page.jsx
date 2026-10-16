@@ -10,7 +10,7 @@ const FEATURES = [
 
 export default function LandingPage() {
   return (
-    <div className="mx-auto max-w-6xl space-y-24 px-6 py-16">
+    <div className="mx-auto max-w-6xl space-y-16 sm:space-y-24 px-4 sm:px-6 py-8 sm:py-16">
 
       {/* Hero */}
       <section className="flex flex-col items-start gap-8 lg:flex-row lg:items-center lg:justify-between">
@@ -18,13 +18,13 @@ export default function LandingPage() {
           <div className="mb-4 inline-block border-2 border-nb-border bg-nb-yellow px-3 py-1 text-xs font-bold uppercase tracking-widest shadow-nb-sm">
             Free · No account needed
           </div>
-          <h1 className="text-5xl font-black uppercase leading-none tracking-tight text-nb-text sm:text-6xl lg:text-7xl">
+          <h1 className="text-4xl font-black uppercase leading-none tracking-tight text-nb-text sm:text-6xl lg:text-7xl">
             Type.<br />Compete.<br />Improve.
           </h1>
-          <p className="mt-6 text-base font-medium text-nb-sub">
+          <p className="mt-4 sm:mt-6 text-sm sm:text-base font-medium text-nb-sub">
             TypingMentor is a typing speed platform with real-time WPM, honest accuracy tracking, and a global leaderboard.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-6 sm:mt-8 flex flex-wrap gap-3">
             <Button href="/test">Start Typing</Button>
             <Button href="/leaderboard" variant="secondary">Leaderboard</Button>
             <Button href="/register" variant="ghost">Register</Button>
@@ -32,15 +32,15 @@ export default function LandingPage() {
         </div>
 
         {/* Decorative stat card */}
-        <div className="flex flex-col gap-4 shrink-0">
-          <div className="border-2 border-nb-border bg-nb-yellow p-8 shadow-nb">
+        <div className="flex w-full sm:w-auto flex-col gap-4 shrink-0">
+          <div className="border-2 border-nb-border bg-nb-yellow p-6 sm:p-8 shadow-nb">
             <p className="text-xs font-bold uppercase tracking-widest text-nb-text/60">Your potential</p>
-            <p className="mt-1 font-mono text-7xl font-black text-nb-text">120</p>
-            <p className="mt-1 text-sm font-bold uppercase text-nb-text/60">WPM</p>
+            <p className="mt-1 font-mono text-5xl sm:text-7xl font-black text-nb-text">120</p>
+            <p className="mt-1 text-xs sm:text-sm font-bold uppercase text-nb-text/60">WPM</p>
           </div>
           <div className="border-2 border-nb-border bg-nb-cyan p-4 shadow-nb-sm">
             <p className="text-xs font-bold uppercase tracking-widest text-nb-text/60">Accuracy</p>
-            <p className="font-mono text-3xl font-black text-nb-text">98.4%</p>
+            <p className="font-mono text-2xl sm:text-3xl font-black text-nb-text">98.4%</p>
           </div>
         </div>
       </section>
@@ -76,9 +76,9 @@ export default function LandingPage() {
       </section>
 
       {/* CTA */}
-      <section className="border-2 border-nb-border bg-nb-text p-10 shadow-nb text-center">
-        <h2 className="text-3xl font-black uppercase text-nb-yellow">Ready to type?</h2>
-        <p className="mt-3 text-sm font-medium text-nb-yellow/70">No account needed. Just open the test and start.</p>
+      <section className="border-2 border-nb-border bg-nb-text p-6 sm:p-10 shadow-nb text-center">
+        <h2 className="text-2xl sm:text-3xl font-black uppercase text-nb-yellow">Ready to type?</h2>
+        <p className="mt-2 sm:mt-3 text-xs sm:text-sm font-medium text-nb-yellow/70">No account needed. Just open the test and start.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Button href="/test">Start Typing</Button>
           <Button href="/leaderboard" variant="ghost">View Leaderboard</Button>

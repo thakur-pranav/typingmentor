@@ -44,10 +44,10 @@ export function TestResult({
     >
 
       {/* ── Hero + graph ── */}
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-stretch lg:gap-6">
+      <div className="flex flex-col gap-4 sm:gap-6 lg:flex-row lg:items-stretch lg:gap-6">
 
-        {/* Hero stat cards */}
-        <div className="flex flex-col gap-4 shrink-0">
+        {/* Hero stat cards - side by side on mobile */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:flex lg:flex-col shrink-0">
           <HeroStat label="WPM" value={result.wpm} accent="yellow" />
           <HeroStat label="Accuracy" value={result.accuracy} suffix="%" accent="cyan" />
         </div>
@@ -56,7 +56,7 @@ export function TestResult({
         {wpmHistory.length >= 2 && (
           <motion.div
             variants={itemVariants}
-            className="flex-1 min-w-0 border-2 border-nb-border bg-nb-card p-4 shadow-nb"
+            className="flex-1 min-w-0 border-2 border-nb-border bg-nb-card p-3 sm:p-4 shadow-nb overflow-hidden"
           >
             <p className="mb-2 text-xs font-bold uppercase tracking-widest text-nb-sub">
               WPM over time
@@ -67,17 +67,19 @@ export function TestResult({
       </div>
 
       {/* ── Secondary stats ── */}
-      <motion.div variants={containerVariants} className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-        <SecStat label="Net WPM"   value={result.netWpm}                     />
-        <SecStat label="Correct"   value={result.correctCharacters}          />
-        <SecStat label="Incorrect" value={result.incorrectCharacters}        />
-        <SecStat label="Time"      value={Math.round(result.duration)} suffix="s" />
-        <SecStat label="Chars"     value={result.totalCharacters}            />
+      <motion.div variants={containerVariants} className="grid grid-cols-2 gap-2.5 sm:gap-3 sm:grid-cols-4 lg:grid-cols-7">
+        <SecStat label="Raw WPM"     value={result.rawWpm ?? result.wpm}           />
+        <SecStat label="Consistency" value={Math.round(result.consistency ?? 0)} suffix="%" />
+        <SecStat label="Net WPM"     value={result.netWpm}                         />
+        <SecStat label="Correct"     value={result.correctCharacters}              />
+        <SecStat label="Incorrect"   value={result.incorrectCharacters}            />
+        <SecStat label="Time"        value={Math.round(result.duration)} suffix="s" />
+        <SecStat label="Chars"       value={result.totalCharacters} className="col-span-2 sm:col-span-2 lg:col-span-1" />
       </motion.div>
 
       {/* ── Save status ── */}
       {(isAuthenticated || saveStatus === "skipped") && (
-        <motion.p variants={itemVariants} className="border-l-4 border-nb-border pl-3 text-sm font-medium text-nb-sub">
+        <motion.p variants={itemVariants} className="border-l-4 border-nb-border pl-3 text-xs sm:text-sm font-medium text-nb-sub">
           {!isAuthenticated                           && "Log in to save results to your history."}
           {isAuthenticated && saveStatus === "saving" && "Saving result…"}
           {isAuthenticated && saveStatus === "saved"  && "✓ Result saved."}
@@ -86,10 +88,10 @@ export function TestResult({
       )}
 
       {/* ── Actions ── */}
-      <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-3">
+      <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2.5 sm:gap-3">
         <button
           onClick={onRestart}
-          className="flex items-center gap-2 border-2 border-nb-border bg-nb-yellow px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-nb-text shadow-nb transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+          className="flex items-center justify-center gap-2 border-2 border-nb-border bg-nb-yellow px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-nb-text shadow-nb transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
             fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -100,13 +102,13 @@ export function TestResult({
         </button>
         <Link
           href="/dashboard"
-          className="border-2 border-nb-border bg-nb-card px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-nb-text shadow-nb-sm transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
+          className="flex items-center justify-center border-2 border-nb-border bg-nb-card px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-nb-text shadow-nb-sm transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none text-center"
         >
           Dashboard
         </Link>
         <Link
           href="/leaderboard"
-          className="border-2 border-nb-border bg-nb-card px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-nb-text shadow-nb-sm transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
+          className="flex items-center justify-center border-2 border-nb-border bg-nb-card px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-nb-text shadow-nb-sm transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none text-center"
         >
           Leaderboard
         </Link>
@@ -229,20 +231,20 @@ function WpmGraph({ wpmHistory }) {
 function HeroStat({ label, value, suffix = "", accent }) {
   const bg = accent === "yellow" ? "bg-nb-yellow" : "bg-nb-cyan";
   return (
-    <motion.div variants={itemVariants} className={`border-2 border-nb-border ${bg} p-6 shadow-nb`}>
-      <p className="text-xs font-bold uppercase tracking-widest text-nb-text/60">{label}</p>
-      <p className="mt-1 font-mono text-6xl font-black tabular-nums text-nb-text leading-none">
+    <motion.div variants={itemVariants} className={`border-2 border-nb-border ${bg} p-4 sm:p-6 shadow-nb`}>
+      <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-nb-text/60">{label}</p>
+      <p className="mt-1 font-mono text-4xl sm:text-6xl font-black tabular-nums text-nb-text leading-none">
         <AnimatedNumber value={value} suffix={suffix} duration={1.1} />
       </p>
     </motion.div>
   );
 }
 
-function SecStat({ label, value, suffix = "", isNumeric = true }) {
+function SecStat({ label, value, suffix = "", isNumeric = true, className = "" }) {
   return (
-    <motion.div variants={itemVariants} className="border-2 border-nb-border bg-nb-card p-4 shadow-nb-sm">
+    <motion.div variants={itemVariants} className={`border-2 border-nb-border bg-nb-card p-3 sm:p-4 shadow-nb-sm ${className}`}>
       <p className="text-[10px] font-bold uppercase tracking-widest text-nb-sub">{label}</p>
-      <p className="mt-1 font-mono text-2xl font-bold tabular-nums text-nb-text">
+      <p className="mt-1 font-mono text-xl sm:text-2xl font-bold tabular-nums text-nb-text">
         {isNumeric ? (
           <AnimatedNumber value={value} suffix={suffix} duration={0.9} />
         ) : (

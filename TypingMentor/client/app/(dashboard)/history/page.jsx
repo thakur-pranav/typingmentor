@@ -54,53 +54,55 @@ function HistoryContent() {
   return (
     <div className="space-y-6">
       {/* Top Toolbar: Filter Pills + Export Button */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        {/* Unboxed Filter Controls */}
-        <div className="flex flex-wrap items-center gap-2">
-          <div role="tablist" aria-label="History mode filter" className="inline-flex flex-wrap gap-2">
-            {MODE_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                role="tab"
-                aria-selected={mode === opt.value}
-                onClick={() => handleModeChange(opt.value)}
-                className={cn(
-                  "border-2 border-[#0d0d0d] px-3.5 py-1.5 text-xs font-bold uppercase tracking-widest transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ffd60a]",
-                  mode === opt.value
-                    ? "bg-[#ffd60a] text-[#0d0d0d] shadow-[2px_2px_0_#0d0d0d]"
-                    : "bg-[#ffffff] text-[#5a5a5a] shadow-[2px_2px_0_#0d0d0d] hover:translate-x-[1px] hover:translate-y-[1px] hover:text-[#0d0d0d] hover:shadow-none"
-                )}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {/* Unboxed Filter Controls with horizontal scroll on mobile */}
+        <div className="w-full sm:w-auto overflow-x-auto no-scrollbar py-1">
+          <div className="flex items-center gap-2 min-w-max">
+            <div role="tablist" aria-label="History mode filter" className="inline-flex gap-2">
+              {MODE_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  role="tab"
+                  aria-selected={mode === opt.value}
+                  onClick={() => handleModeChange(opt.value)}
+                  className={cn(
+                    "border-2 border-[#0d0d0d] px-3.5 py-1.5 text-xs font-bold uppercase tracking-widest transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ffd60a]",
+                    mode === opt.value
+                      ? "bg-[#ffd60a] text-[#0d0d0d] shadow-[2px_2px_0_#0d0d0d]"
+                      : "bg-[#ffffff] text-[#5a5a5a] shadow-[2px_2px_0_#0d0d0d] hover:translate-x-[1px] hover:translate-y-[1px] hover:text-[#0d0d0d] hover:shadow-none"
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
 
-          {mode === "timed" && (
-            <>
-              <span className="mx-1 text-base font-black text-nb-sub" aria-hidden="true">
-                ·
-              </span>
-              <div role="tablist" aria-label="History duration filter" className="inline-flex flex-wrap gap-2">
-                {TIMED_DURATIONS.map((d) => (
-                  <button
-                    key={d}
-                    role="tab"
-                    aria-selected={duration === d}
-                    onClick={() => handleDurationChange(d)}
-                    className={cn(
-                      "border-2 border-[#0d0d0d] px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ffd60a]",
-                      duration === d
-                        ? "bg-[#ffd60a] text-[#0d0d0d] shadow-[2px_2px_0_#0d0d0d]"
-                        : "bg-[#ffffff] text-[#5a5a5a] shadow-[2px_2px_0_#0d0d0d] hover:translate-x-[1px] hover:translate-y-[1px] hover:text-[#0d0d0d] hover:shadow-none"
-                    )}
-                  >
-                    {d}s
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
+            {mode === "timed" && (
+              <>
+                <span className="mx-1 text-base font-black text-nb-sub select-none" aria-hidden="true">
+                  ·
+                </span>
+                <div role="tablist" aria-label="History duration filter" className="inline-flex gap-2">
+                  {TIMED_DURATIONS.map((d) => (
+                    <button
+                      key={d}
+                      role="tab"
+                      aria-selected={duration === d}
+                      onClick={() => handleDurationChange(d)}
+                      className={cn(
+                        "border-2 border-[#0d0d0d] px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ffd60a]",
+                        duration === d
+                          ? "bg-[#ffd60a] text-[#0d0d0d] shadow-[2px_2px_0_#0d0d0d]"
+                          : "bg-[#ffffff] text-[#5a5a5a] shadow-[2px_2px_0_#0d0d0d] hover:translate-x-[1px] hover:translate-y-[1px] hover:text-[#0d0d0d] hover:shadow-none"
+                      )}
+                    >
+                      {d}s
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         {/* CSV Export Button */}
@@ -147,8 +149,8 @@ function HistoryContent() {
 export default function HistoryPage() {
   return (
     <ProtectedRoute>
-      <div className="mx-auto w-full max-w-5xl space-y-8 px-6 py-12">
-        <h1 className="text-3xl font-black uppercase tracking-tight text-nb-text">Typing History</h1>
+      <div className="mx-auto w-full max-w-5xl space-y-6 sm:space-y-8 px-4 sm:px-6 py-6 sm:py-12">
+        <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-nb-text">Typing History</h1>
         <HistoryContent />
       </div>
     </ProtectedRoute>

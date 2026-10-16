@@ -8,16 +8,16 @@ export const metadata = {
 
 export default function FeedbackPage() {
   return (
-    <div className="mx-auto max-w-3xl space-y-8 px-6 py-12">
+    <div className="mx-auto max-w-3xl space-y-6 sm:space-y-8 px-4 sm:px-6 py-6 sm:py-12">
       {/* Header section */}
       <div className="space-y-3">
         <div className="inline-block border-2 border-nb-border bg-nb-yellow px-3 py-1 text-xs font-black uppercase tracking-wider text-nb-text shadow-nb-sm">
           Feedback & Support
         </div>
-        <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-nb-text">
+        <h1 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-nb-text">
           Have an idea or issue? Tell us!
         </h1>
-        <p className="text-sm font-medium leading-relaxed text-nb-sub max-w-2xl">
+        <p className="text-xs sm:text-sm font-medium leading-relaxed text-nb-sub max-w-2xl">
           Whether you have an idea for a new feature, encountered an unexpected bug, or want to ask
           a question about TypingMentor, we are all ears. Every message goes directly to our team.
         </p>

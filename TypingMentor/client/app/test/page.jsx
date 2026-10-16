@@ -139,51 +139,53 @@ export default function TestPage() {
   }, [isFinished, result, isAuthenticated, mode, saveStatus]);
 
   return (
-    <div key={attempt} className="mx-auto flex flex-1 w-full max-w-6xl flex-col justify-center px-6 py-8">
+    <div key={attempt} className="mx-auto flex flex-1 w-full max-w-6xl flex-col justify-center px-4 sm:px-6 py-4 sm:py-8">
 
       {/* Toolbar */}
-      <div className="mb-6 flex flex-wrap items-center justify-start gap-2">
-        <TestModeSelector mode={mode} onChange={handleModeChange} />
+      <div className="mb-6 w-full overflow-x-auto no-scrollbar py-1">
+        <div className="flex items-center justify-start gap-2 min-w-max">
+          <TestModeSelector mode={mode} onChange={handleModeChange} />
 
-        {isTimed && (
-          <>
-            <span className="mx-1 font-bold text-nb-sub">·</span>
-            <DurationSelector duration={duration} onChange={handleDurationChange} />
-          </>
-        )}
+          {isTimed && (
+            <>
+              <span className="mx-1 font-bold text-nb-sub select-none" aria-hidden="true">·</span>
+              <DurationSelector duration={duration} onChange={handleDurationChange} />
+            </>
+          )}
 
-        {mode === "code" && (
-          <>
-            <span className="mx-1 font-bold text-nb-sub">·</span>
-            <LanguageSelector language={language} onChange={handleLanguageChange} />
-          </>
-        )}
+          {mode === "code" && (
+            <>
+              <span className="mx-1 font-bold text-nb-sub select-none" aria-hidden="true">·</span>
+              <LanguageSelector language={language} onChange={handleLanguageChange} />
+            </>
+          )}
 
-        {mode === "custom" && (
-          <>
-            <span className="mx-1 font-bold text-nb-sub">·</span>
-            <button
-              type="button"
-              onClick={() => setIsCustomModalOpen(true)}
-              className="border-2 border-nb-border bg-nb-yellow px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-nb-text shadow-nb-sm hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
-            >
-              Edit Text
-            </button>
-          </>
-        )}
+          {mode === "custom" && (
+            <>
+              <span className="mx-1 font-bold text-nb-sub select-none" aria-hidden="true">·</span>
+              <button
+                type="button"
+                onClick={() => setIsCustomModalOpen(true)}
+                className="border-2 border-nb-border bg-nb-yellow px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-nb-text shadow-nb-sm active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+              >
+                Edit Text
+              </button>
+            </>
+          )}
 
-        {mode !== "code" && (
-          <>
-            <span className="mx-1 font-bold text-nb-sub">·</span>
-            <PunctuationSelector
-              hasPunctuation={hasPunctuation}
-              onChange={handlePunctuationChange}
-            />
-          </>
-        )}
+          {mode !== "code" && (
+            <>
+              <span className="mx-1 font-bold text-nb-sub select-none" aria-hidden="true">·</span>
+              <PunctuationSelector
+                hasPunctuation={hasPunctuation}
+                onChange={handlePunctuationChange}
+              />
+            </>
+          )}
 
-        <span className="mx-1 font-bold text-nb-sub">·</span>
-        <SoundSelector />
+          <span className="mx-1 font-bold text-nb-sub select-none" aria-hidden="true">·</span>
+          <SoundSelector />
+        </div>
       </div>
 
       {/* Code snippet label (shown only in code mode) */}

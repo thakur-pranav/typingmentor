@@ -53,7 +53,7 @@ export function TypingArea({ statuses, typed, onInput, disabled, targetText }) {
 
   return (
     <div
-      className="relative cursor-text border-2 border-nb-border bg-nb-card p-6 md:p-8 shadow-nb"
+      className="relative cursor-text border-2 border-nb-border bg-nb-card p-4 sm:p-6 md:p-8 shadow-nb"
       onClick={() => inputRef.current?.focus()}
     >
       <TypingText statuses={statuses} />

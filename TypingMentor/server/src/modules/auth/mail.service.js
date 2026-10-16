@@ -195,14 +195,20 @@ ${message}
 
     const htmlContent = `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; border: 3px solid #0d0d0d; background: #ffffff; box-shadow: 4px 4px 0 #0d0d0d;">
-        <div style="border-bottom: 2px solid #0d0d0d; padding-bottom: 16px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between;">
-          <h1 style="font-size: 20px; font-weight: 900; text-transform: uppercase; margin: 0; color: #0d0d0d; letter-spacing: -0.5px;">
-            TypingMentor Feedback
-          </h1>
-          <span style="display: inline-block; background-color: ${badgeColor}; color: #0d0d0d; border: 2px solid #0d0d0d; padding: 4px 10px; font-weight: 900; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">
-            ${categoryLabel}
-          </span>
-        </div>
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-bottom: 2px solid #0d0d0d; padding-bottom: 16px; margin-bottom: 24px; width: 100%;">
+          <tr>
+            <td align="left" valign="middle">
+              <h1 style="font-size: 20px; font-weight: 900; text-transform: uppercase; margin: 0; color: #0d0d0d; letter-spacing: -0.5px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                TypingMentor Feedback
+              </h1>
+            </td>
+            <td align="right" valign="middle" style="padding-left: 20px;">
+              <span style="display: inline-block; background-color: ${badgeColor}; color: #0d0d0d; border: 2px solid #0d0d0d; padding: 4px 12px; font-weight: 900; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                ${categoryLabel}
+              </span>
+            </td>
+          </tr>
+        </table>
         
         <div style="background-color: #f4f1ea; border: 2px solid #0d0d0d; padding: 16px; margin-bottom: 20px;">
           <p style="margin: 0 0 8px 0; font-size: 13px;"><strong>From:</strong> ${name} &lt;<a href="mailto:${email}" style="color: #0d0d0d;">${email}</a>&gt;</p>

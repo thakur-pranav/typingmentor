@@ -10,12 +10,12 @@ export function LeaderboardTable({ entries = [] }) {
   const MEDAL = { 1: "🥇", 2: "🥈", 3: "🥉" };
 
   return (
-    <div className="w-full overflow-x-auto border-2 border-nb-border shadow-nb">
-      <table className="w-full text-left text-sm">
+    <div className="w-full overflow-x-auto border-2 border-nb-border shadow-nb no-scrollbar">
+      <table className="w-full text-left text-xs sm:text-sm">
         <thead className="border-b-2 border-nb-border bg-nb-yellow">
           <tr>
             {["Rank", "Username", "Best WPM", "Accuracy"].map((h) => (
-              <th key={h} className="px-4 py-3 text-xs font-black uppercase tracking-widest text-nb-text">
+              <th key={h} className="px-2.5 sm:px-4 py-2.5 sm:py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest text-nb-text">
                 {h}
               </th>
             ))}
@@ -34,15 +34,15 @@ export function LeaderboardTable({ entries = [] }) {
                   i % 2 === 0 ? "bg-nb-card" : "bg-nb-bg"
                 }`}
               >
-                <td className="px-4 py-3 font-black text-nb-text">
+                <td className="px-2.5 sm:px-4 py-2.5 sm:py-3 font-black text-nb-text">
                   {MEDAL[entry.rank] ?? `#${entry.rank}`}
                 </td>
-                <td className="px-4 py-3 font-bold text-nb-text">
-                  <div className="flex flex-wrap items-center gap-2">
+                <td className="px-2.5 sm:px-4 py-2.5 sm:py-3 font-bold text-nb-text">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                     <span>{entry.username}</span>
                     <span
                       className={cn(
-                        "inline-flex items-center gap-1 border border-[#0d0d0d] px-1.5 py-0.5 text-[10px] font-mono font-black uppercase shadow-[1px_1px_0_#0d0d0d]",
+                        "inline-flex items-center gap-1 border border-[#0d0d0d] px-1.5 py-0.5 text-[9px] sm:text-[10px] font-mono font-black uppercase shadow-[1px_1px_0_#0d0d0d]",
                         tier.bg,
                         tier.text
                       )}
@@ -52,8 +52,8 @@ export function LeaderboardTable({ entries = [] }) {
                     </span>
                   </div>
                 </td>
-                <td className="px-4 py-3 font-mono font-black text-nb-text">{entry.bestWpm}</td>
-                <td className="px-4 py-3 font-mono text-nb-sub">{entry.accuracy}%</td>
+                <td className="px-2.5 sm:px-4 py-2.5 sm:py-3 font-mono font-black text-nb-text">{entry.bestWpm}</td>
+                <td className="px-2.5 sm:px-4 py-2.5 sm:py-3 font-mono text-nb-sub">{entry.accuracy}%</td>
               </tr>
             );
           })}

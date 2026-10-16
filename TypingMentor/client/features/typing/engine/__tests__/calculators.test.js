@@ -100,7 +100,8 @@ describe("calculateResult", () => {
       durationSeconds: 60,
     });
     expect(result.accuracy).toBe(60);
-    expect(result.wpm).toBeCloseTo(20);
+    expect(result.rawWpm).toBeCloseTo(20);
+    expect(result.wpm).toBeCloseTo(12);
     expect(result.netWpm).toBeGreaterThanOrEqual(0);
   });
 

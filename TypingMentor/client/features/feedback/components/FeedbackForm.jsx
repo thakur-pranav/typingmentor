@@ -181,13 +181,13 @@ export function FeedbackForm() {
   }
 
   return (
-    <div className="border-2 border-nb-border bg-nb-card p-6 shadow-nb sm:p-8">
+    <div className="border-2 border-nb-border bg-nb-card p-4 sm:p-8 shadow-nb">
       {/* Category Tabs */}
       <div className="mb-6">
         <label className="mb-2 block text-xs font-black uppercase tracking-wider text-nb-text">
           Select Category
         </label>
-        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
           {CATEGORIES.map((cat) => {
             const isActive = category === cat.id;
             return (

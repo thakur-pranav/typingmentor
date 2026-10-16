@@ -1,6 +1,9 @@
-export function calculateAccuracy(correctCharacters, totalCharacters) {
-  if (!totalCharacters || totalCharacters <= 0) return 0;
-  if (!correctCharacters || correctCharacters <= 0) return 0;
-  const accuracy = (correctCharacters / totalCharacters) * 100;
-  return Math.round(accuracy * 100) / 100;
+/**
+ * Backward-compatible adapter delegating to the unified ScoringEngine.
+ */
+import { calculateAccuracy as calcAccuracy, roundForDisplay } from "./ScoringEngine";
+
+export function calculateAccuracy(correctCharacters, totalCharacters, extra = 0) {
+  const unrounded = calcAccuracy(correctCharacters, totalCharacters, extra);
+  return roundForDisplay(unrounded, 2);
 }

@@ -2,14 +2,14 @@
 
 import { AnimatedNumber } from "../../../components/ui/AnimatedNumber.jsx";
 
-export function StatCard({ label, value }) {
+export function StatCard({ label, value, className = "" }) {
   const isPercent = typeof value === "string" && value.endsWith("%");
   const numericValue = typeof value === "number" ? value : parseFloat(value);
   const isValidNumber = !isNaN(numericValue);
 
   return (
-    <div className="border-2 border-nb-border bg-nb-card p-5 shadow-nb text-center">
-      <p className="font-mono text-3xl font-black tabular-nums text-nb-text">
+    <div className={`border-2 border-nb-border bg-nb-card p-3.5 sm:p-5 shadow-nb-sm sm:shadow-nb text-center ${className}`}>
+      <p className="font-mono text-2xl sm:text-3xl font-black tabular-nums text-nb-text">
         {isValidNumber ? (
           <AnimatedNumber
             value={numericValue}

@@ -30,19 +30,19 @@ function DashboardContent() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
+    <div className="space-y-6 sm:space-y-8">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-4 sm:grid-cols-3 md:grid-cols-5">
         <StatCard label="Best WPM" value={stats.bestWpm} />
         <StatCard label="Best Net WPM" value={stats.bestNetWpm} />
         <StatCard label="Average WPM" value={stats.averageWpm} />
         <StatCard label="Average Accuracy" value={`${stats.averageAccuracy}%`} />
-        <StatCard label="Total Tests" value={stats.totalTests} />
+        <StatCard label="Total Tests" value={stats.totalTests} className="col-span-2 sm:col-span-1" />
       </div>
 
       <ProgressChart tests={stats.recentTests} averageWpm={stats.averageWpm} />
 
       <div>
-        <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-nb-sub">Recent tests</h2>
+        <h2 className="mb-3 text-xs sm:text-sm font-bold uppercase tracking-widest text-nb-sub">Recent tests</h2>
         <RecentTestsTable tests={stats.recentTests} />
       </div>
     </div>
@@ -52,8 +52,8 @@ function DashboardContent() {
 export default function DashboardPage() {
   return (
     <ProtectedRoute>
-      <div className="mx-auto w-full max-w-5xl space-y-8 px-6 py-12">
-        <h1 className="text-3xl font-black uppercase tracking-tight text-nb-text">Dashboard</h1>
+      <div className="mx-auto w-full max-w-5xl space-y-6 sm:space-y-8 px-4 sm:px-6 py-6 sm:py-12">
+        <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-nb-text">Dashboard</h1>
         <DashboardContent />
       </div>
     </ProtectedRoute>

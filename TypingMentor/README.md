@@ -7,7 +7,7 @@
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas%20%7C%20Local-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-Neo--Brutalist-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Tests](https://img.shields.io/badge/Tests-55%20Passing%20(100%25)-06D6A0?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Tests](https://img.shields.io/badge/Tests-76%20Passing%20(100%25)-06D6A0?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-FFD60A?style=for-the-badge&logoColor=black)](https://opensource.org/licenses/MIT)
 
 <p align="center">
@@ -44,12 +44,20 @@
 - **Milestone Achievement Badges**: Unlockable badges (`Sniper`, `100+ Club`, `Grandmaster`, `Centurion`, `Veteran`, `Key Warrior`).
 - **Filtered History & CSV Export**: Filter past tests by mode and duration, and download formatted `.csv` spreadsheets directly in the browser.
 
-### 5. Authentication & Competitive Leaderboard
+### 5. Industry-Standard Pure Scoring Engine
+- **Core WPM & Raw WPM**: Fully standardized to Monkeytype conventions:
+  - **Core WPM**: Characters in 100% correct words only divided by 5 per minute. Words with even one typo contribute 0.
+  - **Raw WPM**: All typed keystrokes divided by 5 per minute, accurately capturing raw physical mechanical speed including backspaced typos.
+- **Consistency Rating (0–100%)**: Implements Monkeytype's signature mathematical formula using population coefficient of variation ($\text{cov} = \sigma / \mu$) and a hyperbolic tangent polynomial expansion ($z = \text{cov} + \text{cov}^3/3 + \text{cov}^5/5$).
+- **4-Way Keystroke Classification**: Evaluates `correct`, `incorrect`, `extra` (overtyped beyond word length), and `missed` characters with full newline and space interchangeability in code modes.
+- **Alternative Grading Standards**: Built-in support for 10FastFingers (capital letters = 2 keystrokes), TypeRacer instantaneous burst formulas, Typing.com, Type to Learn, eSkill, and hiring percentile normalization via standard Gaussian error function ($\text{erf}$).
+
+### 6. Authentication & Competitive Leaderboard
 - **Email Verification**: Secure 32-byte crypto verification tokens with zero-friction development fallback (prints verification links in the server console when SMTP is not configured).
 - **Google OAuth 2.0**: 1-click Google Sign-In via Google Identity Services.
 - **Competitive Integrity**: Global leaderboard is strictly restricted to standardized competitive modes (`Time`, `Passage`, `Code`); custom practice tests are excluded to ensure fair competition.
 
-### 6. Feedback & Direct Support
+### 7. Feedback & Direct Support
 - **Dedicated Feedback Portal (`/feedback`)**: Users can submit suggestions, bug reports, or queries directly from a dedicated Neo-Brutalist interface.
 - **15-Minute Anti-Spam Cooldown**: Submissions are strictly rate-limited to once every 15 minutes per user account and client IP address.
 - **Interactive Anti-Spam Modal Alert**: Attempts to spam or submit while on cooldown trigger an accessible Neo-Brutalist pop-up modal displaying a live countdown timer.
@@ -63,7 +71,7 @@
 | :--- | :--- |
 | **Frontend** | Next.js 15 (App Router), React 19, Tailwind CSS (Custom Neo-Brutalist Theme), Web Audio API, Axios, Lucide Icons, Vitest |
 | **Backend** | Node.js (ES Modules), Express.js 4, MongoDB with Mongoose 8, Zod Validation, Bcryptjs, JWT, Nodemailer, Google Auth Library |
-| **Testing** | Vitest, Supertest, MongoDB Memory Server (55 tests, 100% green test suite guarantee) |
+| **Testing** | Vitest, Supertest, MongoDB Memory Server (76 tests, 100% green test suite guarantee) |
 | **DevOps** | Docker, Docker Compose, npm workspaces |
 
 ---
@@ -148,7 +156,7 @@ npm.cmd run dev:client
 | :--- | :--- | :--- |
 | `npm.cmd run dev:client` | `client` | Starts Next.js development server on `http://localhost:3000` |
 | `npm.cmd run dev:server` | `server` | Starts Express development server on `http://localhost:5000` |
-| `npm.cmd run test:client` | `client` | Runs client Vitest suite (30 unit tests) |
+| `npm.cmd run test:client` | `client` | Runs client Vitest suite (51 unit tests) |
 | `npm.cmd run test:server` | `server` | Runs server Vitest suite with MongoDB Memory Server (25 integration tests) |
 | `npm.cmd run build --workspace client` | `client` | Compiles production bundle and statically renders Next.js routes |
 | `npm.cmd run start --workspace client` | `client` | Starts Next.js production server |
@@ -158,7 +166,7 @@ npm.cmd run dev:client
 ## Running Test Suites
 
 ```bash
-# Run client Vitest suite (30 tests: engine math, accuracy, character analyzer, sound engine, punctuation formatting)
+# Run client Vitest suite (51 tests: scoring engine benchmarks, WPM math, accuracy, character analyzer, sound engine, punctuation formatting)
 npm.cmd run test:client
 
 # Run server Vitest suite (25 tests: auth flows, results, statistics, filtered leaderboards, feedback cooldown)
@@ -239,6 +247,52 @@ Common error codes:
 - `UNAUTHORIZED` (401) - Missing or expired JWT token
 - `EMAIL_NOT_VERIFIED` (403) - Account requires email verification
 - `FEEDBACK_COOLDOWN_ACTIVE` (429) - 15-minute anti-spam limit active
+
+---
+
+## Contributing & Collaboration
+
+We warmly welcome contributions from developers, designers, and keyboard enthusiasts of all skill levels! Whether you want to add new language passages to Code Mode, refine the sound synthesizer, optimize performance, or fix an edge-case bug, your contributions are appreciated.
+
+### How to Contribute
+
+1. **Fork the Repository**  
+   Click the **Fork** button at the top right of the GitHub repository page.
+
+2. **Clone Your Fork**
+   ```bash
+   git clone https://github.com/your-username/typingmentor.git
+   cd typingmentor
+   ```
+
+3. **Create a Feature Branch**
+   ```bash
+   git checkout -b feat/your-feature-name
+   ```
+
+4. **Development Guidelines**
+   * **Design Identity**: Respect the **Neo-Brutalist** aesthetic (bold 2px black borders `#0d0d0d`, solid drop shadows `shadow-nb`, uppercase tracking, and warm canvas palettes).
+   * **Pure Scoring Logic**: Keep typing math modular, unrounded, and UI-independent inside `ScoringEngine.js`.
+   * **Backend Standards**: Maintain the layered architecture under `server/src/modules/<feature>/` with strict Zod input validation.
+
+5. **Verify Test Suites**  
+   TypingMentor enforces a **100% green test suite guarantee**. Ensure both suites pass cleanly before submitting:
+   ```bash
+   npm.cmd run test:client   # 51 client unit tests
+   npm.cmd run test:server   # 25 server integration tests
+   ```
+
+6. **Submit a Pull Request (PR)**
+   * Push your branch to GitHub: `git push origin feat/your-feature-name`
+   * Open a **Pull Request / Merge Request** against the `main` branch.
+   * Provide a clear description of your changes, reference any related issues, and attach before/after screenshots for any UI adjustments.
+   * We review PRs promptly and welcome discussions!
+
+### Ways to Contribute
+* 💡 **Code Mode Passages**: Contribute authentic, idiomatic snippets in Go, Kotlin, TypeScript, Swift, or Zig.
+* 🎨 **Sound Synthesizers**: Introduce new acoustic mechanical switch profiles or resonance characteristics.
+* ⚡ **Accessibility & Speed**: Enhance ARIA landmarks, keyboard focus rings, and Core Web Vitals.
+* 🐛 **Bug Reports & Feature Ideas**: Open an Issue on GitHub or submit feedback directly via the in-app `/feedback` page!
 
 ---
 

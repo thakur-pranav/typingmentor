@@ -66,8 +66,8 @@ function ProfileContent() {
 export default function ProfilePage() {
   return (
     <ProtectedRoute>
-      <div className="mx-auto max-w-5xl space-y-8 px-6 py-12">
-        <h1 className="text-3xl font-black uppercase tracking-tight text-nb-text">Profile</h1>
+      <div className="mx-auto max-w-5xl space-y-6 sm:space-y-8 px-4 sm:px-6 py-6 sm:py-12">
+        <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-nb-text">Profile</h1>
         <ProfileContent />
       </div>
     </ProtectedRoute>

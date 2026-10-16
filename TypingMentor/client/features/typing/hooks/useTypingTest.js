@@ -17,6 +17,7 @@ export function useTypingTest(options) {
   const [isFinished, setIsFinished] = useState(false);
   const [result, setResult] = useState(null);
   const [wpmHistory, setWpmHistory] = useState([]);
+  const [rawSamples, setRawSamples] = useState([]);
 
   useEffect(() => {
     const engine = new TypingEngine(options);
@@ -30,6 +31,7 @@ export function useTypingTest(options) {
       if (state.isFinished) {
         setResult(engine.getResult());
         setWpmHistory(engine.getWpmHistory());
+        setRawSamples(engine.getRawSamples());
       }
     });
 
@@ -48,6 +50,7 @@ export function useTypingTest(options) {
     engineRef.current?.reset();
     setResult(null);
     setWpmHistory([]);
+    setRawSamples([]);
   }, []);
 
   const remainingSeconds = options.timedDurationSeconds
@@ -67,6 +70,7 @@ export function useTypingTest(options) {
       isFinished,
       result,
       wpmHistory,
+      rawSamples,
       remainingSeconds,
       elapsedSeconds: stats.elapsedSeconds,
       currentWpm: stats.wpm,
@@ -82,6 +86,7 @@ export function useTypingTest(options) {
       isFinished,
       result,
       wpmHistory,
+      rawSamples,
       remainingSeconds,
       progressPercent,
       handleInput,

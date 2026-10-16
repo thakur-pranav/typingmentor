@@ -1,7 +1,7 @@
 import { analyzeCharacters } from "./CharacterAnalyzer";
 import { calculateResult } from "./ResultCalculator";
 import { calculateAccuracy } from "./AccuracyCalculator";
-import { calculateNetWpm, calculateWpm } from "./WpmCalculator";
+import { calculateNetWpm, calculateWpm, calculateRawWpm } from "./WpmCalculator";
 import { Timer } from "./Timer";
 
 /**
@@ -9,11 +9,12 @@ import { Timer } from "./Timer";
  * input, and derives live statistics + the final TypingResult.
  */
 export class TypingEngine {
-  constructor(options) {
+  constructor(options = {}) {
     this.mode = options.mode;
-    this.targetText = options.targetText;
+    this.targetText = options.targetText || "";
     this.timedDurationSeconds = options.timedDurationSeconds;
     this.timer = new Timer(options.timedDurationSeconds ? options.timedDurationSeconds : null);
+    this.netWpmMethod = options.netWpmMethod || "correct_words";
 
     this.typed = "";
     this.started = false;
@@ -21,7 +22,9 @@ export class TypingEngine {
     this.listeners = [];
     this.finalResult = null;
     this.wpmHistory = [];
+    this.rawSamples = [];
     this.lastRecordedSecond = 0;
+    this.lastSecondTotalKeystrokes = 0;
     this.rawCorrectKeystrokes = 0;
     this.rawIncorrectKeystrokes = 0;
   }
@@ -42,11 +45,16 @@ export class TypingEngine {
     const elapsed = this.started ? this.timer.getElapsedSeconds() : 0;
     const stats = this.computeLiveStats(comparison, elapsed);
 
-    // Record one WPM snapshot per whole elapsed second.
+    // Record per-second raw WPM and running average WPM snapshots
     const wholeSecond = Math.floor(elapsed);
     if (this.started && wholeSecond > this.lastRecordedSecond) {
       for (let s = this.lastRecordedSecond + 1; s <= wholeSecond; s++) {
+        const currentTotalKeystrokes = this.rawCorrectKeystrokes + this.rawIncorrectKeystrokes;
+        const deltaChars = Math.max(0, currentTotalKeystrokes - this.lastSecondTotalKeystrokes);
+        const secondRawWpm = deltaChars * 12; // (deltaChars / 5) * 60
+        this.rawSamples.push(secondRawWpm);
         this.wpmHistory.push(stats.wpm);
+        this.lastSecondTotalKeystrokes = currentTotalKeystrokes;
       }
       this.lastRecordedSecond = wholeSecond;
     }
@@ -57,14 +65,21 @@ export class TypingEngine {
   }
 
   computeLiveStats(comparison, elapsedSeconds) {
-    const totalTyped = comparison.correctCharacters + comparison.incorrectCharacters;
-    const wpm = calculateWpm(totalTyped, elapsedSeconds);
-    const netWpm = calculateNetWpm(wpm, comparison.incorrectCharacters, elapsedSeconds);
     const rawTotal = this.rawCorrectKeystrokes + this.rawIncorrectKeystrokes;
+    const coreWpm = calculateWpm(comparison.correctWordCharacters, elapsedSeconds);
+    const rawWpm = calculateRawWpm(rawTotal > 0 ? rawTotal : comparison.totalCharacters, elapsedSeconds);
+    const netWpm = calculateNetWpm({
+      grossWpm: rawWpm,
+      coreWpm,
+      errors: comparison.incorrectCharacters,
+      durationSeconds: elapsedSeconds,
+      method: this.netWpmMethod,
+    });
     const accuracy = calculateAccuracy(this.rawCorrectKeystrokes, rawTotal);
 
     return {
-      wpm: Math.round(wpm),
+      wpm: Math.round(coreWpm),
+      rawWpm: Math.round(rawWpm),
       netWpm: Math.round(netWpm),
       accuracy,
       errors: comparison.incorrectCharacters,
@@ -124,7 +139,7 @@ export class TypingEngine {
     this.timer.stop();
 
     const comparison = analyzeCharacters(this.targetText, this.typed);
-    const totalCharacters = comparison.correctCharacters + comparison.incorrectCharacters;
+    const totalCharacters = comparison.totalCharacters || (comparison.correctCharacters + comparison.incorrectCharacters);
     const elapsed = this.timer.getElapsedSeconds();
     const duration =
       this.timedDurationSeconds && elapsed >= this.timedDurationSeconds
@@ -137,9 +152,14 @@ export class TypingEngine {
       totalCharacters,
       correctCharacters: comparison.correctCharacters,
       incorrectCharacters: comparison.incorrectCharacters,
+      extraCharacters: comparison.extraCharacters,
+      missedCharacters: comparison.missedCharacters,
+      correctWordCharacters: comparison.correctWordCharacters,
       rawCorrectKeystrokes: this.rawCorrectKeystrokes,
       rawTotalKeystrokes: rawTotal,
       durationSeconds: duration,
+      rawSamples: this.rawSamples,
+      netWpmMethod: this.netWpmMethod,
     });
 
     this.emit();
@@ -153,6 +173,10 @@ export class TypingEngine {
     return [...this.wpmHistory];
   }
 
+  getRawSamples() {
+    return [...this.rawSamples];
+  }
+
   isFinished() {
     return this.finished;
   }
@@ -164,7 +188,9 @@ export class TypingEngine {
     this.finished = false;
     this.finalResult = null;
     this.wpmHistory = [];
+    this.rawSamples = [];
     this.lastRecordedSecond = 0;
+    this.lastSecondTypedLength = 0;
     this.rawCorrectKeystrokes = 0;
     this.rawIncorrectKeystrokes = 0;
     this.emit();

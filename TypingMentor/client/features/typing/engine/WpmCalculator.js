@@ -1,18 +1,33 @@
 /**
- * Standard convention: 5 characters = 1 word.
+ * Backward-compatible adapter delegating to the unified ScoringEngine.
  */
-const CHARS_PER_WORD = 5;
+import {
+  calculateWpm as calcWpm,
+  calculateNetWpm as calcNetWpm,
+  calculateRawWpm as calcRawWpm,
+  calculateCpm as calcCpm,
+  calculateKph as calcKph,
+  CHARS_PER_WORD,
+} from "./ScoringEngine";
+
+export { CHARS_PER_WORD };
 
 export function calculateWpm(totalCharacters, durationSeconds) {
-  if (durationSeconds <= 0) return 0;
-  const durationMinutes = durationSeconds / 60;
-  const words = totalCharacters / CHARS_PER_WORD;
-  return words / durationMinutes;
+  return calcWpm(totalCharacters, durationSeconds);
+}
+
+export function calculateRawWpm(totalCharacters, durationSeconds) {
+  return calcRawWpm(totalCharacters, durationSeconds);
 }
 
 export function calculateNetWpm(wpm, incorrectCharacters, durationSeconds) {
-  if (durationSeconds <= 0) return 0;
-  const durationMinutes = durationSeconds / 60;
-  const penalty = incorrectCharacters / durationMinutes;
-  return Math.max(0, wpm - penalty);
+  return calcNetWpm(wpm, incorrectCharacters, durationSeconds);
+}
+
+export function calculateCpm(wpm) {
+  return calcCpm(wpm);
+}
+
+export function calculateKph(wpm) {
+  return calcKph(wpm);
 }

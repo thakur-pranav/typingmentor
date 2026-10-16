@@ -72,7 +72,7 @@ export function ProfileBadgesSection({ stats }) {
   const percentage = Math.round((unlockedCount / milestones.length) * 100);
 
   return (
-    <div className="border-2 border-nb-border bg-nb-card p-6 shadow-nb">
+    <div className="border-2 border-nb-border bg-nb-card p-4 sm:p-6 shadow-nb">
       <div className="flex items-center justify-between border-b-2 border-nb-border pb-4">
         <div>
           <h3 className="text-base font-black uppercase tracking-wider text-nb-text">
