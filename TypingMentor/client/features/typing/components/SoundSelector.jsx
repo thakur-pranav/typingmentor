@@ -24,11 +24,19 @@ export function SoundSelector() {
     setMounted(true);
   }, []);
 
+  const refocusTypingInput = () => {
+    setTimeout(() => {
+      const textarea = document.querySelector('textarea[aria-label="Typing input"]');
+      textarea?.focus();
+    }, 15);
+  };
+
   // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(e) {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
         setIsOpen(false);
+        refocusTypingInput();
       }
     }
     if (isOpen) {
@@ -54,6 +62,7 @@ export function SoundSelector() {
       soundEngine.setProfile("off");
       setProfile("off");
     }
+    refocusTypingInput();
   };
 
   const handleSelectProfile = (id) => {
@@ -63,6 +72,8 @@ export function SoundSelector() {
       lastActiveProfile.current = id;
       soundEngine.playKey("preview");
     }
+    setIsOpen(false);
+    refocusTypingInput();
   };
 
   const handleVolumeChange = (e) => {
@@ -124,7 +135,10 @@ export function SoundSelector() {
               </span>
               <button
                 type="button"
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  setIsOpen(false);
+                  refocusTypingInput();
+                }}
                 className="border border-nb-border px-1.5 py-0.5 text-xs font-black hover:bg-nb-yellow"
                 aria-label="Close sound settings"
               >

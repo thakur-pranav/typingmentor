@@ -9,7 +9,83 @@ export function TypingArea({ statuses, typed, onInput, disabled, targetText }) {
 
   useEffect(() => {
     inputRef.current?.focus();
-  }, []);
+
+    function handleGlobalKeyDown(e) {
+      if (disabled) return;
+      const active = document.activeElement;
+
+      // Do not intercept if user is typing in another input, textarea, or inside a dialog
+      if (
+        active &&
+        (active.tagName === "INPUT" ||
+          (active.tagName === "TEXTAREA" && active !== inputRef.current) ||
+          active.isContentEditable ||
+          active.closest("[role='dialog']"))
+      ) {
+        return;
+      }
+
+      // If focus is already on our typing textarea, let normal event flow handle it
+      if (active === inputRef.current) {
+        return;
+      }
+
+      // Ignore system shortcuts (Ctrl+C, Ctrl+R, Alt+Tab, etc.)
+      if (e.ctrlKey || e.metaKey || e.altKey) {
+        return;
+      }
+
+      // Blur whatever button or element has focus so Space doesn't activate it
+      if (active && typeof active.blur === "function") {
+        active.blur();
+      }
+      inputRef.current?.focus();
+
+      // Dispatch the first keypress seamlessly so no character is dropped
+      if (e.key === "Tab") {
+        e.preventDefault();
+        soundEngine.playKey("tab");
+        if (targetText && typed.length < targetText.length) {
+          let spaceCount = 0;
+          for (let i = typed.length; i < targetText.length && targetText[i] === " "; i++) {
+            spaceCount++;
+            if (spaceCount === 4) break;
+          }
+          if (spaceCount > 0) {
+            onInput(typed + " ".repeat(spaceCount));
+            return;
+          }
+        }
+        onInput(typed + "  ");
+        return;
+      }
+
+      if (e.key === "Backspace") {
+        e.preventDefault();
+        soundEngine.playBackspace();
+        if (typed.length > 0) {
+          onInput(typed.slice(0, -1));
+        }
+        return;
+      }
+
+      if (e.key === " ") {
+        e.preventDefault();
+        soundEngine.playSpace();
+        onInput(typed + " ");
+        return;
+      }
+
+      if (e.key.length === 1) {
+        e.preventDefault();
+        soundEngine.playKey(e.key);
+        onInput(typed + e.key);
+      }
+    }
+
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, [disabled, typed, targetText, onInput]);
 
   function handleChange(event) {
     onInput(event.target.value);
