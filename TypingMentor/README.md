@@ -7,7 +7,8 @@
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas%20%7C%20Local-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-Neo--Brutalist-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Tests](https://img.shields.io/badge/Tests-76%20Passing%20(100%25)-06D6A0?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Tests](https://img.shields.io/badge/Tests-78%20Passing%20(100%25)-06D6A0?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-byteforgelabs.tech-00B4D8?style=for-the-badge&logo=vercel&logoColor=white)](https://typingmentor.byteforgelabs.tech)
 [![License: MIT](https://img.shields.io/badge/License-MIT-FFD60A?style=for-the-badge&logoColor=black)](https://opensource.org/licenses/MIT)
 
 <p align="center">
@@ -15,6 +16,14 @@
 </p>
 
 </div>
+
+---
+
+## 🌐 Live Application & Mirrors
+
+- **Production (Custom Domain)**: [https://typingmentor.byteforgelabs.tech](https://typingmentor.byteforgelabs.tech)
+- **Vercel Mirror**: [https://typingmentor.vercel.app](https://typingmentor.vercel.app)
+- **Backend API (Render)**: [https://typingmentor.onrender.com](https://typingmentor.onrender.com)
 
 ---
 
@@ -57,11 +66,13 @@
 - **Google OAuth 2.0**: 1-click Google Sign-In via Google Identity Services.
 - **Competitive Integrity**: Global leaderboard is strictly restricted to standardized competitive modes (`Time`, `Passage`, `Code`); custom practice tests are excluded to ensure fair competition.
 
-### 7. Feedback & Direct Support
+### 7. Feedback & Verified Support
 - **Dedicated Feedback Portal (`/feedback`)**: Users can submit suggestions, bug reports, or queries directly from a dedicated Neo-Brutalist interface.
+- **Verified Account Protection**: Submissions strictly require an authenticated account with a verified email address (`isEmailVerified: true`), preventing dummy non-existent email abuse.
+- **Anti-Spoofing Locked Sender**: The sender address is automatically resolved and locked to the user's verified account email.
 - **15-Minute Anti-Spam Cooldown**: Submissions are strictly rate-limited to once every 15 minutes per user account and client IP address.
-- **Interactive Anti-Spam Modal Alert**: Attempts to spam or submit while on cooldown trigger an accessible Neo-Brutalist pop-up modal displaying a live countdown timer.
-- **Direct Support Notification**: Automatic email notification dispatched via Brevo/Nodemailer to the team inbox (`byteforgelabs.app@gmail.com`) with the user's email set as `replyTo`.
+- **Interactive Anti-Spam Modal Alert**: Attempts to resubmit while on cooldown trigger an accessible Neo-Brutalist pop-up modal displaying a live countdown timer.
+- **Direct Support Notification**: Automatic email notification dispatched via Brevo/Nodemailer to the team inbox (`byteforgelabs.app@gmail.com`) with the verified user's address set as `replyTo`.
 
 ---
 
@@ -71,7 +82,7 @@
 | :--- | :--- |
 | **Frontend** | Next.js 15 (App Router), React 19, Tailwind CSS (Custom Neo-Brutalist Theme), Web Audio API, Axios, Lucide Icons, Vitest |
 | **Backend** | Node.js (ES Modules), Express.js 4, MongoDB with Mongoose 8, Zod Validation, Bcryptjs, JWT, Nodemailer, Google Auth Library |
-| **Testing** | Vitest, Supertest, MongoDB Memory Server (76 tests, 100% green test suite guarantee) |
+| **Testing** | Vitest, Supertest, MongoDB Memory Server (78 tests, 100% green test suite guarantee) |
 | **DevOps** | Docker, Docker Compose, npm workspaces |
 
 ---
@@ -157,7 +168,7 @@ npm.cmd run dev:client
 | `npm.cmd run dev:client` | `client` | Starts Next.js development server on `http://localhost:3000` |
 | `npm.cmd run dev:server` | `server` | Starts Express development server on `http://localhost:5000` |
 | `npm.cmd run test:client` | `client` | Runs client Vitest suite (51 unit tests) |
-| `npm.cmd run test:server` | `server` | Runs server Vitest suite with MongoDB Memory Server (25 integration tests) |
+| `npm.cmd run test:server` | `server` | Runs server Vitest suite with MongoDB Memory Server (27 integration tests) |
 | `npm.cmd run build --workspace client` | `client` | Compiles production bundle and statically renders Next.js routes |
 | `npm.cmd run start --workspace client` | `client` | Starts Next.js production server |
 
@@ -169,7 +180,7 @@ npm.cmd run dev:client
 # Run client Vitest suite (51 tests: scoring engine benchmarks, WPM math, accuracy, character analyzer, sound engine, punctuation formatting)
 npm.cmd run test:client
 
-# Run server Vitest suite (25 tests: auth flows, results, statistics, filtered leaderboards, feedback cooldown)
+# Run server Vitest suite (27 tests: auth flows, results, statistics, filtered leaderboards, feedback cooldown & verification)
 npm.cmd run test:server
 ```
 
@@ -214,8 +225,8 @@ docker compose up --build -d
 ### Feedback & Support
 | Method | Endpoint | Auth | Description |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/feedback` | No | Submit feedback message (enforces 15-minute cooldown per user/IP) |
-| `GET` | `/api/feedback/cooldown` | No | Check cooldown status and remaining time for IP/email |
+| `POST` | `/api/feedback` | Yes | Submit feedback message (requires verified email, enforces 15-minute cooldown) |
+| `GET` | `/api/feedback/cooldown` | Yes | Check active cooldown status and remaining time for authenticated user |
 
 ---
 
@@ -279,7 +290,7 @@ We warmly welcome contributions from developers, designers, and keyboard enthusi
    TypingMentor enforces a **100% green test suite guarantee**. Ensure both suites pass cleanly before submitting:
    ```bash
    npm.cmd run test:client   # 51 client unit tests
-   npm.cmd run test:server   # 25 server integration tests
+   npm.cmd run test:server   # 27 server integration tests
    ```
 
 6. **Submit a Pull Request (PR)**
