@@ -1,0 +1,48 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    name: Lint & Test Suite
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./TypingMentor
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: 'TypingMentor/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint Client Workspace
+        run: npm run lint --workspace client
+
+      - name: Run Client Vitest Tests (51 tests)
+        run: npm run test:client
+
+      - name: Run Server Vitest Tests (27 tests)
+        run: npm run test:server
+        env:
+          NODE_ENV: test
+          JWT_SECRET: ci_test_jwt_secret_key_32_bytes_long_here
+          JWT_EXPIRES_IN: 7d
+

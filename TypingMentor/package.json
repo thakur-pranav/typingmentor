@@ -9,6 +9,8 @@
     "build:client": "npm run build --workspace client",
     "build:server": "node -e \"console.log('Server is native JavaScript, no build step required.')\"",
     "test:client": "npm run test --workspace client",
-    "test:server": "npm run test --workspace server"
+    "test:server": "npm run test --workspace server",
+    "lint": "npm run lint --workspace client",
+    "test": "npm run test:client && npm run test:server"
   }
 }
