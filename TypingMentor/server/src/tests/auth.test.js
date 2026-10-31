@@ -145,5 +145,77 @@ describe("Auth", () => {
     expect(res.body.data.user.email).toBe("credentialuser@example.com");
     expect(res.body.data.user.isEmailVerified).toBe(true);
   });
+
+  it("sets HttpOnly refresh cookie on login and rotates token via /api/auth/refresh", async () => {
+    await request(app).post("/api/auth/register").send({
+      username: "refresher",
+      email: "refresher@example.com",
+      password: "password123",
+    });
+
+    const loginRes = await request(app).post("/api/auth/login").send({
+      email: "refresher@example.com",
+      password: "password123",
+    });
+
+    expect(loginRes.status).toBe(200);
+    expect(loginRes.headers["set-cookie"]).toBeDefined();
+    const cookies = loginRes.headers["set-cookie"];
+    const refreshCookie = cookies.find((c) => c.startsWith("tm_refresh_token="));
+    expect(refreshCookie).toBeDefined();
+    expect(refreshCookie).toContain("HttpOnly");
+
+    // Extract cookie value
+    const cookieHeader = refreshCookie.split(";")[0];
+
+    // Call /api/auth/refresh with the cookie
+    const refreshRes = await request(app)
+      .post("/api/auth/refresh")
+      .set("Cookie", cookieHeader);
+
+    expect(refreshRes.status).toBe(200);
+    expect(refreshRes.body.data.token).toBeDefined();
+    expect(refreshRes.body.data.user.email).toBe("refresher@example.com");
+
+    // Verify rotated cookie in response
+    const newCookies = refreshRes.headers["set-cookie"];
+    const newRefreshCookie = newCookies.find((c) => c.startsWith("tm_refresh_token="));
+    expect(newRefreshCookie).toBeDefined();
+  });
+
+  it("rejects /api/auth/refresh without refresh cookie", async () => {
+    const res = await request(app).post("/api/auth/refresh");
+    expect(res.status).toBe(401);
+  });
+
+  it("clears refresh cookie and revokes session on /api/auth/logout", async () => {
+    const regRes = await request(app).post("/api/auth/register").send({
+      username: "logoutuser",
+      email: "logoutuser@example.com",
+      password: "password123",
+    });
+
+    const token = regRes.body.data.token;
+    const cookies = regRes.headers["set-cookie"];
+    const cookieHeader = cookies?.find((c) => c.startsWith("tm_refresh_token="))?.split(";")[0];
+
+    const logoutRes = await request(app)
+      .post("/api/auth/logout")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(logoutRes.status).toBe(200);
+    const logoutCookies = logoutRes.headers["set-cookie"];
+    const clearedCookie = logoutCookies.find((c) => c.startsWith("tm_refresh_token="));
+    expect(clearedCookie).toBeDefined();
+    expect(clearedCookie).toMatch(/Max-Age=0|expires=/i);
+
+    // Attempting refresh with previous cookie must now fail
+    if (cookieHeader) {
+      const refreshAttempt = await request(app)
+        .post("/api/auth/refresh")
+        .set("Cookie", cookieHeader);
+      expect(refreshAttempt.status).toBe(401);
+    }
+  });
 });
 

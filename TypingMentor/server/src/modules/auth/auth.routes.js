@@ -9,7 +9,7 @@ import {
   resendVerificationSchema,
   googleAuthSchema,
 } from "./auth.validation.js";
-import { requireAuth } from "../../middleware/auth.middleware.js";
+import { requireAuth, optionalAuth } from "../../middleware/auth.middleware.js";
 
 const router = Router();
 
@@ -22,10 +22,11 @@ const authRateLimiter = rateLimit({
 
 router.post("/register", authRateLimiter, validate(registerSchema), authController.register);
 router.post("/login", authRateLimiter, validate(loginSchema), authController.login);
+router.post("/refresh", authController.refresh);
 router.post("/verify-email", validate(verifyEmailSchema), authController.verifyEmail);
 router.post("/resend-verification", authRateLimiter, validate(resendVerificationSchema), authController.resendVerification);
 router.post("/google", authRateLimiter, validate(googleAuthSchema), authController.googleLogin);
-router.post("/logout", authController.logout);
+router.post("/logout", optionalAuth, authController.logout);
 router.get("/me", requireAuth, authController.me);
 
 export default router;

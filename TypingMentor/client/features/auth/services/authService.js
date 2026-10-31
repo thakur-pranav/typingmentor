@@ -30,6 +30,11 @@ export const authService = {
     await apiClient.post("/auth/logout");
   },
 
+  async refresh() {
+    const { data } = await apiClient.post("/auth/refresh");
+    return data.data;
+  },
+
   async getCurrentUser() {
     const { data } = await apiClient.get("/auth/me");
     return data.data;

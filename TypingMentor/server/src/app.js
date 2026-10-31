@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import cookieParser from "cookie-parser";
 import { env } from "./config/env.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
 import { notFoundMiddleware } from "./middleware/notFound.middleware.js";
@@ -41,6 +42,7 @@ export function createApp() {
   );
 
   app.use(express.json());
+  app.use(cookieParser());
 
   app.get("/health", (_req, res) => {
     res.json({ success: true, message: "OK" });

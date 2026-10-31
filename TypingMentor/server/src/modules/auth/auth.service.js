@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import { ApiError } from "../../utils/ApiError.js";
 import { authRepository } from "./auth.repository.js";
 import { passwordService } from "./password.service.js";
-import { signAccessToken } from "./token.service.js";
+import { signAccessToken, signRefreshToken, verifyRefreshToken, hashRefreshToken } from "./token.service.js";
 import { mailService } from "./mail.service.js";
 import { googleAuthService } from "./google.service.js";
 import { UserModel } from "../users/user.model.js";
@@ -56,7 +56,10 @@ export const authService = {
     }
 
     const token = signAccessToken({ userId: String(user._id), email: user.email });
-    return { token, user: toAuthUser(user), requireVerification: false };
+    const refreshToken = signRefreshToken({ userId: String(user._id) });
+    user.refreshTokenHash = hashRefreshToken(refreshToken);
+    await user.save();
+    return { token, refreshToken, user: toAuthUser(user), requireVerification: false };
   },
 
   async login(input) {
@@ -84,7 +87,10 @@ export const authService = {
     }
 
     const token = signAccessToken({ userId: String(user._id), email: user.email });
-    return { token, user: toAuthUser(user) };
+    const refreshToken = signRefreshToken({ userId: String(user._id) });
+    user.refreshTokenHash = hashRefreshToken(refreshToken);
+    await user.save();
+    return { token, refreshToken, user: toAuthUser(user) };
   },
 
   async verifyEmail(token) {
@@ -104,10 +110,13 @@ export const authService = {
     user.isEmailVerified = true;
     user.emailVerificationToken = undefined;
     user.emailVerificationExpires = undefined;
-    await user.save();
 
     const authToken = signAccessToken({ userId: String(user._id), email: user.email });
-    return { token: authToken, user: toAuthUser(user) };
+    const refreshToken = signRefreshToken({ userId: String(user._id) });
+    user.refreshTokenHash = hashRefreshToken(refreshToken);
+    await user.save();
+
+    return { token: authToken, refreshToken, user: toAuthUser(user) };
   },
 
   async resendVerification(email) {
@@ -182,6 +191,48 @@ export const authService = {
     }
 
     const token = signAccessToken({ userId: String(user._id), email: user.email });
-    return { token, user: toAuthUser(user) };
+    const refreshToken = signRefreshToken({ userId: String(user._id) });
+    user.refreshTokenHash = hashRefreshToken(refreshToken);
+    await user.save();
+
+    return { token, refreshToken, user: toAuthUser(user) };
+  },
+
+  async refresh(refreshToken) {
+    if (!refreshToken) {
+      throw ApiError.unauthorized("Refresh token is required");
+    }
+
+    let payload;
+    try {
+      payload = verifyRefreshToken(refreshToken);
+    } catch {
+      throw ApiError.unauthorized("Invalid or expired refresh token");
+    }
+
+    const user = await UserModel.findById(payload.userId).select("+refreshTokenHash");
+    if (!user || !user.refreshTokenHash) {
+      throw ApiError.unauthorized("User session expired or revoked");
+    }
+
+    const hashed = hashRefreshToken(refreshToken);
+    if (user.refreshTokenHash !== hashed) {
+      user.refreshTokenHash = undefined;
+      await user.save();
+      throw ApiError.unauthorized("Invalid refresh token (reuse detected)");
+    }
+
+    const newAccessToken = signAccessToken({ userId: String(user._id), email: user.email });
+    const newRefreshToken = signRefreshToken({ userId: String(user._id) });
+    user.refreshTokenHash = hashRefreshToken(newRefreshToken);
+    await user.save();
+
+    return { token: newAccessToken, refreshToken: newRefreshToken, user: toAuthUser(user) };
+  },
+
+  async logout(userId) {
+    if (userId) {
+      await UserModel.findByIdAndUpdate(userId, { $unset: { refreshTokenHash: 1 } });
+    }
   },
 };

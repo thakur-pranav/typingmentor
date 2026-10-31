@@ -10,6 +10,7 @@ const userSchema = new Schema(
     isEmailVerified: { type: Boolean, default: false },
     emailVerificationToken: { type: String, select: false },
     emailVerificationExpires: { type: Date, select: false },
+    refreshTokenHash: { type: String, select: false },
   },
   { timestamps: true }
 );
@@ -22,6 +23,7 @@ userSchema.set("toJSON", {
     delete ret.passwordHash;
     delete ret.emailVerificationToken;
     delete ret.emailVerificationExpires;
+    delete ret.refreshTokenHash;
     return ret;
   },
 });

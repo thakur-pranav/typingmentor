@@ -18,10 +18,21 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshUser = useCallback(async () => {
+    // If no access token in storage, attempt silent session refresh via HttpOnly cookie
     if (!getToken()) {
-      setUser(null);
-      return;
+      try {
+        const refreshData = await authService.refresh();
+        if (refreshData?.token) {
+          setToken(refreshData.token);
+          setUser(refreshData.user);
+          return;
+        }
+      } catch {
+        setUser(null);
+        return;
+      }
     }
+
     try {
       const currentUser = await authService.getCurrentUser();
       setUser(currentUser);
