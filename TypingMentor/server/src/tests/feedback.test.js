@@ -1,9 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import request from "supertest";
 import "./setup.js";
 import { createApp } from "../app.js";
 import { UserModel } from "../modules/users/user.model.js";
 import { signAccessToken } from "../modules/auth/token.service.js";
+import { feedbackCooldownStore } from "../utils/rateLimiter.js";
+import { feedbackRepository } from "../modules/feedback/feedback.repository.js";
 
 const app = createApp();
 
@@ -18,6 +20,10 @@ async function createTestUser({ username, email, isEmailVerified = true }) {
 }
 
 describe("Feedback Module (Verified Users Only)", () => {
+  beforeEach(() => {
+    feedbackCooldownStore.clearAll();
+    vi.restoreAllMocks();
+  });
   const validPayload = {
     name: "Alex Typist",
     category: "suggestion",
@@ -195,6 +201,67 @@ describe("Feedback Module (Verified Users Only)", () => {
     expect(check2.status).toBe(200);
     expect(check2.body.data.canSubmit).toBe(false);
     expect(check2.body.data.remainingSeconds).toBeGreaterThan(800);
+  });
+
+  it("intercepts rapid submissions in RAM without querying MongoDB", async () => {
+    const { token } = await createTestUser({
+      username: "ram_perf_user",
+      email: "ram.perf@example.com",
+      isEmailVerified: true,
+    });
+
+    const repoSpy = vi.spyOn(feedbackRepository, "findRecentSubmission");
+
+    // First submission: queries DB as cold start, then records in RAM
+    const res1 = await request(app)
+      .post("/api/feedback")
+      .set("Authorization", `Bearer ${token}`)
+      .set("X-Forwarded-For", "203.0.113.50")
+      .send(validPayload);
+
+    expect(res1.status).toBe(201);
+    const dbCallsAfterFirst = repoSpy.mock.calls.length;
+
+    // Second submission: must be intercepted by in-memory rate limiter
+    const res2 = await request(app)
+      .post("/api/feedback")
+      .set("Authorization", `Bearer ${token}`)
+      .set("X-Forwarded-For", "203.0.113.50")
+      .send(validPayload);
+
+    expect(res2.status).toBe(429);
+    expect(res2.body.code).toBe("FEEDBACK_COOLDOWN_ACTIVE");
+    // Verify that ZERO additional database queries were executed!
+    expect(repoSpy.mock.calls.length).toBe(dbCallsAfterFirst);
+  });
+
+  it("intercepts GET /api/feedback/cooldown in RAM without querying MongoDB", async () => {
+    const { token } = await createTestUser({
+      username: "ram_status_user",
+      email: "ram.status@example.com",
+      isEmailVerified: true,
+    });
+
+    // Submit feedback to populate in-memory cooldown store
+    await request(app)
+      .post("/api/feedback")
+      .set("Authorization", `Bearer ${token}`)
+      .set("X-Forwarded-For", "203.0.113.51")
+      .send(validPayload);
+
+    const repoSpy = vi.spyOn(feedbackRepository, "findRecentSubmission");
+
+    // Status check while in cooldown: should hit RAM directly
+    const res = await request(app)
+      .get("/api/feedback/cooldown")
+      .set("Authorization", `Bearer ${token}`)
+      .set("X-Forwarded-For", "203.0.113.51");
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.canSubmit).toBe(false);
+    expect(res.body.data.remainingSeconds).toBeGreaterThan(0);
+    // Verifies 0 MongoDB database queries on in-memory cache hit
+    expect(repoSpy).not.toHaveBeenCalled();
   });
 });
 

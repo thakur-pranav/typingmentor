@@ -35,10 +35,12 @@ export const feedbackController = {
 
   getCooldownStatus: asyncHandler(async (req, res) => {
     const userId = req.auth?.userId;
+    const email = req.auth?.email;
     const ip = getClientIp(req);
 
     const status = await feedbackService.getCooldownStatus({
       userId,
+      email,
       ip,
     });
 
