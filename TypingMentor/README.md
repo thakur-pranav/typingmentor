@@ -7,7 +7,8 @@
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas%20%7C%20Local-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-Neo--Brutalist-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Tests](https://img.shields.io/badge/Tests-81%20Passing%20(100%25)-06D6A0?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
+[![CI](https://img.shields.io/github/actions/workflow/status/thakur-pranav/typingmentor/ci.yml?branch=main&label=CI&style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/thakur-pranav/typingmentor/actions)
+[![Tests](https://img.shields.io/badge/Tests-92%20Passing%20(100%25)-06D6A0?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-byteforgelabs.tech-00B4D8?style=for-the-badge&logo=vercel&logoColor=white)](https://typingmentor.byteforgelabs.tech)
 [![License: MIT](https://img.shields.io/badge/License-MIT-FFD60A?style=for-the-badge&logoColor=black)](https://opensource.org/licenses/MIT)
 
@@ -62,6 +63,9 @@
 - **Alternative Grading Standards**: Built-in support for 10FastFingers (capital letters = 2 keystrokes), TypeRacer instantaneous burst formulas, Typing.com, Type to Learn, eSkill, and hiring percentile normalization via standard Gaussian error function ($\text{erf}$).
 
 ### 6. Authentication & Competitive Leaderboard
+- **Dual-Token Authentication**: Hardened architecture utilizing short-lived (15-minute) JWT access tokens paired with 7-day secure `HttpOnly` refresh cookies (`SameSite=none` in prod, `Secure`).
+- **Cryptographic Token Hashing & Rotation**: Refresh tokens are hashed using SHA-256 in MongoDB (`refreshTokenHash`) and rotated automatically on each `/api/auth/refresh` call, complete with reuse detection to revoke compromised sessions immediately.
+- **Silent Axios Token Interceptor**: Seamless client request queue catches 401 expiration responses, fetches fresh credentials silently, and replays pending requests without interrupting active user tests.
 - **Email Verification**: Secure 32-byte crypto verification tokens with zero-friction development fallback (prints verification links in the server console when SMTP is not configured).
 - **Google OAuth 2.0**: 1-click Google Sign-In via Google Identity Services.
 - **Competitive Integrity**: Global leaderboard is strictly restricted to standardized competitive modes (`Time`, `Passage`, `Code`); custom practice tests are excluded to ensure fair competition.
@@ -70,7 +74,8 @@
 - **Dedicated Feedback Portal (`/feedback`)**: Users can submit suggestions, bug reports, or queries directly from a dedicated Neo-Brutalist interface.
 - **Verified Account Protection**: Submissions strictly require an authenticated account with a verified email address (`isEmailVerified: true`), preventing dummy non-existent email abuse.
 - **Anti-Spoofing Locked Sender**: The sender address is automatically resolved and locked to the user's verified account email.
-- **15-Minute Anti-Spam Cooldown**: Submissions are strictly rate-limited to once every 15 minutes per user account and client IP address.
+- **In-Memory Sliding Window Rate Limiting**: Submissions and cooldown queries are verified against an $O(1)$ in-memory store in RAM across compound keys (`userId`, `email`, client `IP`), eliminating disk-bound MongoDB queries with sub-millisecond response latency.
+- **Background TTL Garbage Collection**: Rate limiter automatically sweeps expired entries using unreferenced background timers, preventing memory leaks while allowing non-blocking process termination.
 - **Interactive Anti-Spam Modal Alert**: Attempts to resubmit while on cooldown trigger an accessible Neo-Brutalist pop-up modal displaying a live countdown timer.
 - **Direct Support Notification**: Automatic email notification dispatched via Brevo/Nodemailer to the team inbox (`byteforgelabs.app@gmail.com`) with the verified user's address set as `replyTo`.
 
@@ -82,8 +87,8 @@
 | :--- | :--- |
 | **Frontend** | Next.js 15 (App Router), React 19, Tailwind CSS (Custom Neo-Brutalist Theme), Web Audio API, Axios, Lucide Icons, Vitest |
 | **Backend** | Node.js (ES Modules), Express.js 4, MongoDB with Mongoose 8, Zod Validation, Bcryptjs, JWT, Nodemailer, Google Auth Library |
-| **Testing** | Vitest, Supertest, MongoDB Memory Server (81 tests, 100% green test suite guarantee) |
-| **DevOps** | Docker, Docker Compose, npm workspaces |
+| **Testing** | Vitest, Supertest, MongoDB Memory Server (92 tests, 100% green test suite guarantee) |
+| **DevOps** | GitHub Actions (CI/CD matrix testing across Node 18.x & 20.x), Docker, Docker Compose, npm workspaces |
 
 ---
 
@@ -170,7 +175,7 @@ npm.cmd run dev:client
 | `npm.cmd run dev:client` | `client` | Starts Next.js development server on `http://localhost:3000` |
 | `npm.cmd run dev:server` | `server` | Starts Express development server on `http://localhost:5000` |
 | `npm.cmd run test:client` | `client` | Runs client Vitest suite (51 unit tests) |
-| `npm.cmd run test:server` | `server` | Runs server Vitest suite with MongoDB Memory Server (30 integration tests) |
+| `npm.cmd run test:server` | `server` | Runs server Vitest suite with MongoDB Memory Server (41 integration tests) |
 | `npm.cmd run build --workspace client` | `client` | Compiles production bundle and statically renders Next.js routes |
 | `npm.cmd run start --workspace client` | `client` | Starts Next.js production server |
 
@@ -182,7 +187,7 @@ npm.cmd run dev:client
 # Run client Vitest suite (51 tests: scoring engine benchmarks, WPM math, accuracy, character analyzer, sound engine, punctuation formatting)
 npm.cmd run test:client
 
-# Run server Vitest suite (30 tests: dual-token auth & refresh rotation, results, statistics, filtered leaderboards, feedback cooldown)
+# Run server Vitest suite (41 tests: dual-token auth & refresh rotation, results, statistics, filtered leaderboards, in-memory rate limiting)
 npm.cmd run test:server
 ```
 
@@ -294,7 +299,7 @@ We warmly welcome contributions from developers, designers, and keyboard enthusi
    TypingMentor enforces a **100% green test suite guarantee**. Ensure both suites pass cleanly before submitting:
    ```bash
    npm.cmd run test:client   # 51 client unit tests
-   npm.cmd run test:server   # 30 server integration tests
+   npm.cmd run test:server   # 41 server integration tests
    ```
 
 6. **Submit a Pull Request (PR)**
