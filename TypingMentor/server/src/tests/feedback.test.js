@@ -263,5 +263,31 @@ describe("Feedback Module (Verified Users Only)", () => {
     // Verifies 0 MongoDB database queries on in-memory cache hit
     expect(repoSpy).not.toHaveBeenCalled();
   });
+
+  it("includes remainingSeconds in the 429 cooldown response body", async () => {
+    const { token } = await createTestUser({
+      username: "remaining_user",
+      email: "remaining.user@example.com",
+    });
+    await request(app)
+      .post("/api/feedback")
+      .set("Authorization", `Bearer ${token}`)
+      .send(validPayload);
+    const res = await request(app)
+      .post("/api/feedback")
+      .set("Authorization", `Bearer ${token}`)
+      .send(validPayload);
+
+    expect(res.status).toBe(429);
+    expect(res.body.remainingSeconds).toBeGreaterThan(800);
+    expect(res.body.remainingSeconds).toBeLessThanOrEqual(900);
+  });
+
+  it("escapes HTML in user-provided feedback before it reaches email templates", async () => {
+    const { escapeHtml } = await import("../modules/auth/mail.service.js");
+    expect(escapeHtml('<a href="x">hi</a> & \'bye\'')).toBe(
+      "&lt;a href=&quot;x&quot;&gt;hi&lt;/a&gt; &amp; &#39;bye&#39;"
+    );
+  });
 });
 

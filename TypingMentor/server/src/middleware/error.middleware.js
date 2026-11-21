@@ -20,5 +20,6 @@ export function errorMiddleware(err, _req, res, _next) {
     success: false,
     message,
     ...(err.code ? { code: err.code } : {}),
+    ...(err instanceof ApiError && err.details ? err.details : {}),
   });
 }

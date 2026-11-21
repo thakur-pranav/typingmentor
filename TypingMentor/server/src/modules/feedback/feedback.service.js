@@ -68,7 +68,8 @@ export const feedbackService = {
         429,
         `Please wait ${timeString} before submitting another feedback request.`,
         true,
-        "FEEDBACK_COOLDOWN_ACTIVE"
+        "FEEDBACK_COOLDOWN_ACTIVE",
+        { remainingSeconds: memCooldown.remainingSeconds }
       );
     }
 
@@ -95,7 +96,8 @@ export const feedbackService = {
           429,
           `Please wait ${timeString} before submitting another feedback request.`,
           true,
-          "FEEDBACK_COOLDOWN_ACTIVE"
+          "FEEDBACK_COOLDOWN_ACTIVE",
+          { remainingSeconds }
         );
       }
     }

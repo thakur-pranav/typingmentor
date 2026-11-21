@@ -12,6 +12,10 @@ export const userService = {
     if (!data.username) {
       return this.getById(id);
     }
+    const taken = await userRepository.findByUsername(data.username);
+    if (taken && String(taken._id) !== String(id)) {
+      throw ApiError.conflict("That username is already taken");
+    }
     const updated = await userRepository.updateUsername(id, data.username);
     if (!updated) throw ApiError.notFound("User not found");
     return updated;

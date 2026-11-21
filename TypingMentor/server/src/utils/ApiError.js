@@ -1,9 +1,14 @@
 export class ApiError extends Error {
-  constructor(statusCode, message, isOperational = true, code = null) {
+  /**
+   * @param {object|null} details - Extra safe fields merged into the error JSON body
+   *   (e.g. { remainingSeconds } for cooldown errors).
+   */
+  constructor(statusCode, message, isOperational = true, code = null, details = null) {
     super(message);
     this.statusCode = statusCode;
     this.isOperational = isOperational;
     this.code = code;
+    this.details = details;
   }
 
   static badRequest(message = "Bad request") {

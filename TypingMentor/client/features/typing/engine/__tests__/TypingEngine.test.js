@@ -58,4 +58,18 @@ describe("TypingEngine", () => {
 
     engine.destroy();
   });
+
+  it("clears per-second keystroke tracking on reset so samples restart from zero", () => {
+    const engine = new TypingEngine({ mode: "custom", targetText: "hello world again" });
+
+    engine.handleInput("hello wor");
+    engine.lastSecondTotalKeystrokes = 9; // simulate a recorded second
+    engine.reset();
+
+    expect(engine.lastSecondTotalKeystrokes).toBe(0);
+    expect(engine.rawCorrectKeystrokes).toBe(0);
+    expect(engine.rawSamples).toEqual([]);
+
+    engine.destroy();
+  });
 });

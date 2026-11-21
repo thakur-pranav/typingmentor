@@ -190,7 +190,7 @@ export class TypingEngine {
     this.wpmHistory = [];
     this.rawSamples = [];
     this.lastRecordedSecond = 0;
-    this.lastSecondTypedLength = 0;
+    this.lastSecondTotalKeystrokes = 0;
     this.rawCorrectKeystrokes = 0;
     this.rawIncorrectKeystrokes = 0;
     this.emit();

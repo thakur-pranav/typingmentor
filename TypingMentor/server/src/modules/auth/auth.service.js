@@ -6,6 +6,7 @@ import { signAccessToken, signRefreshToken, verifyRefreshToken, hashRefreshToken
 import { mailService } from "./mail.service.js";
 import { googleAuthService } from "./google.service.js";
 import { UserModel } from "../users/user.model.js";
+import { userRepository } from "../users/user.repository.js";
 
 function toAuthUser(user) {
   return {
@@ -24,6 +25,10 @@ export const authService = {
     const existing = await authRepository.findByEmail(input.email);
     if (existing) {
       throw ApiError.conflict("An account with this email already exists");
+    }
+
+    if (await userRepository.findByUsername(input.username)) {
+      throw ApiError.conflict("That username is already taken");
     }
 
     const passwordHash = await passwordService.hash(input.password);
@@ -149,17 +154,34 @@ export const authService = {
     const tokenPayload = typeof payload === "string" ? { credential: payload } : (payload || {});
     const googleProfile = await googleAuthService.verifyGoogleToken(tokenPayload);
 
+    // Only trust Google emails that Google itself has verified; otherwise anyone could
+    // claim an arbitrary address and be linked to that account.
+    if (!googleProfile.isEmailVerified) {
+      throw ApiError.forbidden("Your Google account email is not verified. Please verify it with Google first.");
+    }
+
     let user = await authRepository.findByGoogleId(googleProfile.googleId);
 
     if (!user) {
       user = await authRepository.findByEmail(googleProfile.email);
       if (user) {
-        user.googleId = googleProfile.googleId;
-        user.isEmailVerified = true;
-        if (googleProfile.picture && !user.avatarUrl) {
-          user.avatarUrl = googleProfile.picture;
+        if (!user.isEmailVerified) {
+          // Pre-hijack protection: an unverified email/password account may have been
+          // registered by someone who does not own this inbox. The Google owner has now
+          // proven ownership, so drop the unproven password and revoke any sessions.
+          await UserModel.updateOne(
+            { _id: user._id },
+            {
+              $unset: {
+                passwordHash: 1,
+                emailVerificationToken: 1,
+                emailVerificationExpires: 1,
+                refreshTokenHash: 1,
+              },
+            }
+          );
         }
-        await user.save();
+        user.googleId = googleProfile.googleId;
       }
     }
 
@@ -169,7 +191,7 @@ export const authService = {
 
       let finalUsername = baseUsername;
       let suffix = 1;
-      while (await UserModel.findOne({ username: finalUsername })) {
+      while (await userRepository.findByUsername(finalUsername)) {
         finalUsername = `${baseUsername.slice(0, 15)}_${Math.floor(1000 + Math.random() * 9000)}`;
         suffix++;
         if (suffix > 10) break;

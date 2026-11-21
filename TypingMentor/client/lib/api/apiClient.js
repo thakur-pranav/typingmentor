@@ -99,6 +99,9 @@ apiClient.interceptors.response.use(
     const customError = new Error(message);
     customError.code = error.response?.data?.code;
     customError.status = error.response?.status;
+    if (typeof error.response?.data?.remainingSeconds === "number") {
+      customError.remainingSeconds = error.response.data.remainingSeconds;
+    }
     return Promise.reject(customError);
   }
 );

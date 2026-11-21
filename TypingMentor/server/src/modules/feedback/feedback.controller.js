@@ -2,11 +2,12 @@ import { feedbackService } from "./feedback.service.js";
 import { sendSuccess } from "../../utils/ApiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 
+/**
+ * Uses Express's req.ip, which honours `app.set("trust proxy", 1)`: it takes the address
+ * appended by our one trusted proxy (Render) and ignores any X-Forwarded-For entries the
+ * client injected itself. Reading the first X-Forwarded-For entry directly is spoofable.
+ */
 function getClientIp(req) {
-  const forwarded = req.headers["x-forwarded-for"];
-  if (forwarded) {
-    return forwarded.split(",")[0].trim();
-  }
   return req.ip || null;
 }
 

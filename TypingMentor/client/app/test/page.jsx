@@ -121,20 +121,24 @@ export default function TestPage() {
     setAttempt((a) => a + 1);
   }, []);
 
+  // Play the completion chime exactly once per finished test.
   useEffect(() => {
     if (isFinished && result) {
       soundEngine.playCompletion();
-      if (saveStatus === "idle") {
-        if (!isAuthenticated) {
-          setSaveStatus("skipped");
-          return;
-        }
-        setSaveStatus("saving");
-        resultService
-          .submit(mode, result)
-          .then(() => setSaveStatus("saved"))
-          .catch(() => setSaveStatus("error"));
+    }
+  }, [isFinished, result]);
+
+  useEffect(() => {
+    if (isFinished && result && saveStatus === "idle") {
+      if (!isAuthenticated) {
+        setSaveStatus("skipped");
+        return;
       }
+      setSaveStatus("saving");
+      resultService
+        .submit(mode, result)
+        .then(() => setSaveStatus("saved"))
+        .catch(() => setSaveStatus("error"));
     }
   }, [isFinished, result, isAuthenticated, mode, saveStatus]);
 

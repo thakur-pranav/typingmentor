@@ -2,6 +2,16 @@ import nodemailer from "nodemailer";
 
 let transporter = null;
 
+/** Escapes user-controlled text before it is interpolated into email HTML. */
+export function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function parseSender(fromStr) {
   if (!fromStr) {
     return { name: "TypingMentor", email: "support@byteforgelabs.tech" };
@@ -109,7 +119,7 @@ This link will expire in 24 hours. If you did not create an account, you can saf
           Verify Your Email Address
         </h2>
         <p style="font-size: 15px; line-height: 1.6; color: #333333; margin: 0 0 24px 0;">
-          Hi <strong>${username}</strong>, thanks for joining TypingMentor! Please verify your email to activate your account and start competing on the global leaderboard.
+          Hi <strong>${escapeHtml(username)}</strong>, thanks for joining TypingMentor! Please verify your email to activate your account and start competing on the global leaderboard.
         </p>
         <div style="margin: 28px 0;">
           <a href="${verificationUrl}" style="background-color: #ffd60a; color: #0d0d0d; border: 2px solid #0d0d0d; padding: 14px 28px; font-weight: 900; font-size: 13px; text-transform: uppercase; text-decoration: none; display: inline-block; box-shadow: 3px 3px 0 #0d0d0d; letter-spacing: 0.5px;">
@@ -185,6 +195,16 @@ This link will expire in 24 hours. If you did not create an account, you can saf
     };
     const badgeColor = categoryColors[category] || "#ffd60a";
 
+    // Escaped copies for the HTML body (the plain-text body keeps the raw values).
+    const safe = {
+      name: escapeHtml(name),
+      email: escapeHtml(email),
+      emailHref: escapeHtml(encodeURIComponent(email)).replace(/%40/g, "@"),
+      subject: escapeHtml(subject),
+      message: escapeHtml(message),
+      category: escapeHtml(categoryLabel),
+    };
+
     const textContent = `New Feedback from ${name} (${email})
 Category: ${categoryLabel}
 Subject: ${subject}
@@ -204,15 +224,15 @@ ${message}
             </td>
             <td align="right" valign="middle" style="padding-left: 20px;">
               <span style="display: inline-block; background-color: ${badgeColor}; color: #0d0d0d; border: 2px solid #0d0d0d; padding: 4px 12px; font-weight: 900; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-                ${categoryLabel}
+                ${safe.category}
               </span>
             </td>
           </tr>
         </table>
         
         <div style="background-color: #f4f1ea; border: 2px solid #0d0d0d; padding: 16px; margin-bottom: 20px;">
-          <p style="margin: 0 0 8px 0; font-size: 13px;"><strong>From:</strong> ${name} &lt;<a href="mailto:${email}" style="color: #0d0d0d;">${email}</a>&gt;</p>
-          <p style="margin: 0; font-size: 13px;"><strong>Subject:</strong> ${subject}</p>
+          <p style="margin: 0 0 8px 0; font-size: 13px;"><strong>From:</strong> ${safe.name} &lt;<a href="mailto:${safe.emailHref}" style="color: #0d0d0d;">${safe.email}</a>&gt;</p>
+          <p style="margin: 0; font-size: 13px;"><strong>Subject:</strong> ${safe.subject}</p>
         </div>
 
         <div style="margin: 24px 0;">
@@ -220,13 +240,13 @@ ${message}
             User Message:
           </h2>
           <div style="background: #ffffff; border: 2px solid #0d0d0d; padding: 18px; font-size: 14px; line-height: 1.6; color: #111111; white-space: pre-wrap;">
-${message}
+${safe.message}
           </div>
         </div>
 
         <div style="border-top: 1px solid #e5e5e5; margin-top: 28px; padding-top: 16px;">
           <p style="font-size: 12px; color: #888888; margin: 0;">
-            Click "Reply" to respond directly to ${email}.
+            Click "Reply" to respond directly to ${safe.email}.
           </p>
         </div>
       </div>

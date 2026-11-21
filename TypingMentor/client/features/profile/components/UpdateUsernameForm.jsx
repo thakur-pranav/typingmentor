@@ -11,15 +11,18 @@ export function UpdateUsernameForm() {
   const { user, refreshUser } = useAuth();
   const [username, setUsername] = useState(user?.username ?? "");
   const [status, setStatus] = useState("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   async function handleSubmit(event) {
     event.preventDefault();
     setStatus("saving");
+    setErrorMessage("");
     try {
       await profileService.updateUsername(username);
       await refreshUser();
       setStatus("saved");
-    } catch {
+    } catch (err) {
+      setErrorMessage(err instanceof Error && err.message ? err.message : "Could not update username.");
       setStatus("error");
     }
   }
@@ -27,7 +30,7 @@ export function UpdateUsernameForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {status === "saved" && <Alert variant="success">Username updated.</Alert>}
-      {status === "error" && <Alert variant="error">Could not update username.</Alert>}
+      {status === "error" && <Alert variant="error">{errorMessage}</Alert>}
       <TextField
         label="Username"
         value={username}

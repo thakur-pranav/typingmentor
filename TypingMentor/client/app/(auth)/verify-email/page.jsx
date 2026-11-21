@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../../../features/auth/hooks/AuthProvider.jsx";
@@ -20,25 +20,30 @@ function VerifyEmailContent() {
   const [resendStatus, setResendStatus] = useState("idle"); // idle, sending, sent, error
   const [resendMessage, setResendMessage] = useState("");
 
+  // Tokens are single-use. React StrictMode runs effects twice in development, so guard
+  // with a ref to make sure each token is submitted only once (otherwise the second call
+  // fails with "invalid or expired" even though the first one verified the account).
+  const submittedTokenRef = useRef(null);
+
   useEffect(() => {
     if (!token) {
       setStatus("idle");
       return;
     }
+    if (submittedTokenRef.current === token) return;
+    submittedTokenRef.current = token;
 
-    let isMounted = true;
     setStatus("verifying");
+    let redirectTimer;
 
     verifyEmail(token)
       .then(() => {
-        if (!isMounted) return;
         setStatus("success");
-        setTimeout(() => {
+        redirectTimer = setTimeout(() => {
           router.push("/dashboard");
         }, 2000);
       })
       .catch((err) => {
-        if (!isMounted) return;
         setStatus("error");
         setErrorMessage(
           err instanceof Error
@@ -48,7 +53,7 @@ function VerifyEmailContent() {
       });
 
     return () => {
-      isMounted = false;
+      if (redirectTimer) clearTimeout(redirectTimer);
     };
   }, [token, verifyEmail, router]);
 

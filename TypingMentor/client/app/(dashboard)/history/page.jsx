@@ -17,6 +17,7 @@ const MODE_OPTIONS = [
   { value: "timed", label: "Time" },
   { value: "passage", label: "Passage" },
   { value: "code", label: "Code" },
+  { value: "custom", label: "Custom" },
 ];
 
 function HistoryContent() {

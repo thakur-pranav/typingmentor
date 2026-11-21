@@ -10,10 +10,18 @@ function required(name, fallback) {
   return value;
 }
 
+const nodeEnv = process.env.NODE_ENV ?? "development";
+const isProd = nodeEnv === "production";
+
+// In production, secrets must come from the environment. Dev/test keep convenient defaults.
+if (isProd && !process.env.JWT_SECRET) {
+  throw new Error("Missing required environment variable in production: JWT_SECRET");
+}
+
 export const env = {
   port: Number(process.env.PORT ?? 5000),
-  nodeEnv: process.env.NODE_ENV ?? "development",
-  mongodbUri: required("MONGODB_URI", "mongodb://localhost:27017/typingmentor"),
+  nodeEnv,
+  mongodbUri: required("MONGODB_URI", isProd ? undefined : "mongodb://localhost:27017/typingmentor"),
   jwtSecret: required("JWT_SECRET", "dev_secret_change_me"),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? "15m",
   jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || (process.env.JWT_SECRET ? `${process.env.JWT_SECRET}_refresh` : "dev_refresh_secret_change_me"),

@@ -36,13 +36,13 @@ jobs:
       - name: Lint Client Workspace
         run: npm run lint --workspace client
 
-      - name: Run Client Vitest Tests (51 tests)
+      - name: Run Client Vitest Tests
         run: npm run test:client
 
-      - name: Run Server Vitest Tests (27 tests)
+      - name: Run Server Vitest Tests
         run: npm run test:server
         env:
           NODE_ENV: test
           JWT_SECRET: ci_test_jwt_secret_key_32_bytes_long_here
-          JWT_EXPIRES_IN: 7d
+          JWT_EXPIRES_IN: 15m
 

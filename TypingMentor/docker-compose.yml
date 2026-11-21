@@ -23,7 +23,7 @@ services:
       NODE_ENV: production
       MONGODB_URI: mongodb://mongo:27017/typingmentor
       JWT_SECRET: ${JWT_SECRET:-typingmentor_prod_secret_key_change_me}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
       CLIENT_URL: ${CLIENT_URL:-http://localhost:3000}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       SMTP_HOST: ${SMTP_HOST:-}

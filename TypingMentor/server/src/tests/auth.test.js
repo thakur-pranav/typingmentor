@@ -217,5 +217,78 @@ describe("Auth", () => {
       expect(refreshAttempt.status).toBe(401);
     }
   });
+
+  it("rejects registration with a username that is already taken (case-insensitive)", async () => {
+    await request(app).post("/api/auth/register").send({
+      username: "Speedster",
+      email: "speed1@example.com",
+      password: "password123",
+    });
+    const res = await request(app).post("/api/auth/register").send({
+      username: "speedster",
+      email: "speed2@example.com",
+      password: "password123",
+    });
+    expect(res.status).toBe(409);
+    expect(res.body.message).toMatch(/username is already taken/i);
+  });
+
+  it("rejects changing username to one owned by another user", async () => {
+    await request(app).post("/api/auth/register").send({
+      username: "takenname",
+      email: "owner@example.com",
+      password: "password123",
+    });
+    const other = await request(app).post("/api/auth/register").send({
+      username: "othername",
+      email: "other@example.com",
+      password: "password123",
+    });
+    const res = await request(app)
+      .patch("/api/users/me")
+      .set("Authorization", `Bearer ${other.body.data.token}`)
+      .send({ username: "TakenName" });
+    expect(res.status).toBe(409);
+  });
+
+  it("rejects Google sign-in when Google has not verified the email", async () => {
+    vi.spyOn(googleAuthService, "verifyGoogleToken").mockResolvedValueOnce({
+      googleId: "google-unverified",
+      email: "unverified-google@example.com",
+      name: "Unverified",
+      isEmailVerified: false,
+    });
+    const res = await request(app).post("/api/auth/google").send({ accessToken: "mock" });
+    expect(res.status).toBe(403);
+  });
+
+  it("wipes the unproven password when Google links an unverified email account (pre-hijack)", async () => {
+    // Attacker pre-registers the victim's email and never verifies it.
+    const victimEmail = "victim@example.com";
+    await request(app).post("/api/auth/register").send({
+      username: "attacker",
+      email: victimEmail,
+      password: "attackerpass",
+    });
+    const { UserModel } = await import("../modules/users/user.model.js");
+    await UserModel.updateOne({ email: victimEmail }, { isEmailVerified: false });
+
+    // The real owner signs in with Google.
+    vi.spyOn(googleAuthService, "verifyGoogleToken").mockResolvedValueOnce({
+      googleId: "google-victim",
+      email: victimEmail,
+      name: "Victim",
+      isEmailVerified: true,
+    });
+    const googleRes = await request(app).post("/api/auth/google").send({ accessToken: "mock" });
+    expect(googleRes.status).toBe(200);
+
+    // The attacker's password no longer works.
+    const login = await request(app).post("/api/auth/login").send({
+      email: victimEmail,
+      password: "attackerpass",
+    });
+    expect(login.status).not.toBe(200);
+  });
 });
 

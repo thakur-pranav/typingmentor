@@ -9,6 +9,11 @@ export const userRepository = {
     return UserModel.findOne({ email: email.toLowerCase() }).select("+passwordHash");
   },
 
+  /** Case-insensitive username lookup ("Alice" and "alice" are the same name). */
+  findByUsername(username) {
+    return UserModel.findOne({ username: username.trim() }).collation({ locale: "en", strength: 2 });
+  },
+
   findById(id) {
     return UserModel.findById(id);
   },
